@@ -1,0 +1,823 @@
+<title>Yuga Locker Build Manual</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* Layout: single reading column with a wide diagram band; tables and code scroll inside their own frames */
+:root{
+  --bg:#F3F5F6; --panel:#FFFFFF; --ink:#16222B; --muted:#56646D; --rule:#D3DADE;
+  --accent:#AF5B26; --accent-soft:#F6E7DC; --ok:#2E7D50; --warn:#A3441F;
+  --c-sig:#2463A8; --c-i2c:#2B7D4F; --c-sen:#6A45B8; --c-pwr:#C4332F; --c-gnd:#1E2A31;
+  --f-display:"Archivo",system-ui,sans-serif; --f-body:"Atkinson Hyperlegible",system-ui,sans-serif; --f-mono:"JetBrains Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#10161A; --panel:#172026; --ink:#E4EBEE; --muted:#9BAAB2; --rule:#2A3740;
+  --accent:#E38B53; --accent-soft:#2E2119; --ok:#6CC592; --warn:#F09A72;
+  --c-sig:#6FA8E8; --c-i2c:#63C08A; --c-sen:#A98BEA; --c-pwr:#F07A74; --c-gnd:#C9D3D8; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#10161A; --panel:#172026; --ink:#E4EBEE; --muted:#9BAAB2; --rule:#2A3740;
+  --accent:#E38B53; --accent-soft:#2E2119; --ok:#6CC592; --warn:#F09A72;
+  --c-sig:#6FA8E8; --c-i2c:#63C08A; --c-sen:#A98BEA; --c-pwr:#F07A74; --c-gnd:#C9D3D8; color-scheme:dark}
+*,*::before,*::after{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.6;margin:0;padding:0 16px}
+.wrap{max-width:1040px;margin:0 auto;padding-block:28px 64px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.15;margin:0}
+h1{font-size:clamp(2rem,5vw,3rem);font-weight:700;letter-spacing:-.02em}
+h2{font-size:1.6rem;font-weight:700;margin-top:56px;padding-top:18px;border-top:2px solid var(--ink)}
+h3{font-size:1.15rem;font-weight:600;margin-top:26px}
+p,li{max-width:70ch}
+.lede{color:var(--muted);font-size:1.1rem;margin:10px 0 0}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.meta a{font-family:var(--f-display);font-weight:600;font-size:.88rem;color:var(--ink);text-decoration:none;border:1.5px solid var(--rule);border-radius:999px;padding:4px 12px;background:var(--panel)}
+.meta a:hover,.meta a:focus-visible{border-color:var(--accent);outline:none}
+code,.mono{font-family:var(--f-mono);font-size:.86em}
+code{background:var(--accent-soft);padding:1px 5px;border-radius:4px}
+.frame{overflow-x:auto;background:var(--panel);border:1.5px solid var(--rule);border-radius:10px;margin-top:14px}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:.95rem}
+th,td{text-align:left;vertical-align:top;padding:10px 14px;border-bottom:1px solid var(--rule)}
+th{font-family:var(--f-display);font-weight:600;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--bg)}
+tr:last-child td{border-bottom:0}
+td.pin{font-family:var(--f-mono);font-size:.85rem;white-space:nowrap;font-variant-numeric:tabular-nums}
+td.stage{font-family:var(--f-display);font-weight:700;color:var(--accent);white-space:nowrap}
+.diagram{min-width:900px;display:block}
+.diagram text{font-family:var(--f-body);fill:var(--ink);font-size:13px}
+.diagram .t-mono{font-family:var(--f-mono);font-size:11.5px}
+.diagram .t-muted{fill:var(--muted);font-size:12px}
+.diagram .t-head{font-family:var(--f-display);font-weight:700;font-size:15px}
+.diagram .mod{fill:var(--bg);stroke:var(--ink);stroke-width:1.2}
+.diagram .board{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.6}
+.diagram .w{fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.w.sig{stroke:var(--c-sig)} .w.i2c{stroke:var(--c-i2c)} .w.sen{stroke:var(--c-sen)} .w.pwr{stroke:var(--c-pwr)} .w.gnd{stroke:var(--c-gnd)}
+.diagram .pinpt{fill:var(--ink)}
+.diagram .reed{fill:var(--panel);stroke:var(--c-sen);stroke-width:1.5}
+.steps{counter-reset:st;list-style:none;padding:0;margin:14px 0 0;display:grid;gap:12px}
+.steps>li{counter-increment:st;display:grid;grid-template-columns:34px minmax(0,1fr);gap:12px;max-width:none}
+.steps>li::before{content:counter(st);font-family:var(--f-display);font-weight:700;width:30px;height:30px;border-radius:50%;border:1.5px solid var(--accent);color:var(--accent);display:grid;place-items:center;font-size:.9rem;margin-top:1px}
+.steps b{font-family:var(--f-display);font-weight:600}
+.part{background:var(--panel);border:1.5px solid var(--rule);border-radius:10px;padding:18px 20px;margin-top:16px}
+.part h3{margin-top:0;display:flex;gap:10px;align-items:baseline}
+.part h3 span{font-family:var(--f-mono);font-size:.8rem;color:var(--accent);font-weight:600}
+.note{border-left:4px solid var(--accent);background:var(--accent-soft);padding:12px 16px;margin-top:14px;border-radius:0 8px 8px 0}
+.note.warn{border-left-color:var(--warn)}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-top:14px}
+.cols>div{min-width:0}
+.play{background:var(--ink);color:var(--bg);border-radius:12px;padding:22px 24px;margin-top:16px}
+.play h3{margin-top:0;color:var(--bg)}
+.play ol{margin:10px 0 0;padding-left:1.3em}
+.play li{max-width:60ch;margin:4px 0}
+details{margin-top:14px;background:var(--panel);border:1.5px solid var(--rule);border-radius:10px}
+summary{cursor:pointer;padding:14px 18px;font-family:var(--f-display);font-weight:600}
+summary:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.codebar{display:flex;justify-content:flex-end;padding:0 18px}
+button{font-family:var(--f-display);font-weight:600;font-size:.88rem;background:var(--ink);color:var(--bg);border:0;border-radius:8px;padding:7px 14px;cursor:pointer}
+button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+pre{margin:10px 0 0;padding:16px 18px;overflow:auto;max-height:560px;font-family:var(--f-mono);font-size:.8rem;line-height:1.55;border-top:1px solid var(--rule);tab-size:2}
+.diagram.sm{min-width:640px}
+.diagram .mov{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.5}
+.diagram .fix{fill:var(--bg);stroke:var(--ink);stroke-width:1.2}
+.diagram .band{fill:var(--panel);stroke:var(--muted);stroke-width:1}
+.diagram .spr{fill:none;stroke:var(--c-sen);stroke-width:2;stroke-linejoin:round}
+.diagram .petal{fill:var(--accent);opacity:.85}
+.diagram .callout circle{fill:var(--ink)}
+.diagram .callout text{fill:var(--bg);font-family:var(--f-display);font-weight:700;font-size:13px;text-anchor:middle}
+ol.keylist{margin:12px 0 0;padding-left:1.5em;display:grid;gap:6px}
+ol.keylist li{max-width:none}
+.part .note{margin-top:14px}
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:12px;font-size:.9rem;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{display:inline-block;width:22px;height:3px;border-radius:2px}
+@media (max-width:560px){body{font-size:16px} h2{font-size:1.35rem}}
+</style>
+
+<div class="wrap">
+<header>
+  <h1>Yuga Locker Build Manual</h1>
+  <p class="lede">Arduino circuit with a sensor for every puzzle stage, how to build and wire each part, a manual override, and a spring-powered version with no electronics at all.</p>
+  <nav class="meta" aria-label="Sections">
+    <a href="#stages">Sensors per stage</a><a href="#circuit">Circuit</a><a href="#parts">Parts</a><a href="#build">Build steps</a>
+    <a href="#test">Test and calibrate</a><a href="#manual">Manual override</a><a href="#mech">Mechanical version</a><a href="#play">How to play</a><a href="#fix">Troubleshooting</a><a href="#code">Code</a>
+  </nav>
+</header>
+
+<h2 id="stages">What each stage senses</h2>
+<p>Every puzzle has a physical lock and a sensor. The physical part stops the child from skipping ahead; the sensor lets the Arduino see what happened, show the next instruction on the screen and light the lotus.</p>
+<div class="frame"><table>
+<thead><tr><th>Stage</th><th>Child does</th><th>Sensor</th><th>Where it sits</th><th>Arduino pin</th><th>Arduino then</th></tr></thead>
+<tbody>
+<tr><td class="stage">1 Code</td><td>Types 1709</td><td>3×4 keypad</td><td>Front of the base</td><td class="pin">D2–D8</td><td>Latch servo (D9) frees the lid</td></tr>
+<tr><td class="stage">2 Puzzle</td><td>Turns 3 picture bands until the 4 yuga pictures are whole</td><td>3 reed switches, a magnet in each band</td><td>Inside the core tube, one at each band's height, at the front mark</td><td class="pin">PCF P4–P6</td><td>Shows "Bands Y Y –", green light per band</td></tr>
+<tr><td class="stage">3 Leaves</td><td>Plugs each leaf into its shaped socket</td><td>4 reed switches, a magnet in each leaf peg</td><td>Behind each socket in the leaf ring</td><td class="pin">PCF P0–P3</td><td>Names the yuga, lights 2 LEDs in its metal colour</td></tr>
+<tr><td class="stage">4 Ring</td><td>Turns the ring with the leaves</td><td>1 reed switch, magnet on the ring</td><td>Core wall, beside the button hole</td><td class="pin">PCF P7</td><td>"Holes lined up! Push the button"</td></tr>
+<tr><td class="stage">5 Button</td><td>Pushes the button through both holes</td><td>Lever microswitch</td><td>Inside the core, at the end of the button's path</td><td class="pin">A0</td><td>Lotus servo (D10) lifts the rod, petals open, tune plays</td></tr>
+<tr><td class="stage">Reset</td><td>Removes leaves, closes the lid</td><td>Reed switch, magnet under the lid</td><td>Top edge of the front wall</td><td class="pin">A1</td><td>Locks itself again</td></tr>
+</tbody></table></div>
+<p>The Uno does not have enough pins for 8 ring and band sensors plus the keypad, so the eight sensors go through a <b>PCF8574</b> input module. It shares the two I2C wires (A4, A5) with the screen.</p>
+
+<h2 id="circuit">Circuit diagram</h2>
+<div class="legend" aria-hidden="true">
+  <span><i style="background:var(--c-sig)"></i>Signal</span><span><i style="background:var(--c-i2c)"></i>I2C bus</span>
+  <span><i style="background:var(--c-sen)"></i>Sensor input</span><span><i style="background:var(--c-pwr)"></i>+5 V</span><span><i style="background:var(--c-gnd)"></i>GND</span>
+</div>
+<div class="frame">
+<svg class="diagram" viewBox="0 100 1100 620" role="img" aria-labelledby="dgT dgD">
+<title id="dgT">Yuga locker wiring diagram</title>
+<desc id="dgD">Arduino Uno in the centre. Keypad on D2 to D8, buzzer on D12, button switch on A0 and lid reed switch on A1 on the left. Lid servo on D9, lotus servo on D10, NeoPixel ring on D11 through 330 ohms, LCD and PCF8574 on the I2C bus A4 and A5 on the right. The PCF8574 reads eight reed switches: four leaves, three picture bands and the ring. A 5 volt 3 amp supply feeds a power rail with a 1000 microfarad capacitor.</desc>
+
+<!-- Arduino -->
+<rect class="board" x="400" y="110" width="170" height="440" rx="10"/>
+<text class="t-head" x="485" y="140" text-anchor="middle">Arduino Uno</text>
+<g class="t-mono">
+<text class="t-mono" x="410" y="174">D2</text><text class="t-mono" x="410" y="189">D3</text><text class="t-mono" x="410" y="204">D4</text><text class="t-mono" x="410" y="219">D5</text>
+<text class="t-mono" x="410" y="234">D6</text><text class="t-mono" x="410" y="249">D7</text><text class="t-mono" x="410" y="264">D8</text>
+<text class="t-mono" x="410" y="314">D12</text><text class="t-mono" x="410" y="364">A0</text><text class="t-mono" x="410" y="404">A1</text>
+<text class="t-mono" x="560" y="174" text-anchor="end">D9</text><text class="t-mono" x="560" y="214" text-anchor="end">D10</text><text class="t-mono" x="560" y="254" text-anchor="end">D11</text>
+<text class="t-mono" x="560" y="324" text-anchor="end">A4 SDA</text><text class="t-mono" x="560" y="344" text-anchor="end">A5 SCL</text>
+<text class="t-mono" x="560" y="474" text-anchor="end">5V</text><text class="t-mono" x="560" y="504" text-anchor="end">GND</text>
+</g>
+
+<!-- Keypad -->
+<rect class="mod" x="60" y="150" width="190" height="130" rx="8"/>
+<text class="t-head" x="72" y="171">Keypad 3×4</text>
+<g fill="none" stroke="var(--muted)" stroke-width="1">
+<rect x="76" y="182" width="22" height="18" rx="3"/><rect x="104" y="182" width="22" height="18" rx="3"/><rect x="132" y="182" width="22" height="18" rx="3"/>
+<rect x="76" y="204" width="22" height="18" rx="3"/><rect x="104" y="204" width="22" height="18" rx="3"/><rect x="132" y="204" width="22" height="18" rx="3"/>
+<rect x="76" y="226" width="22" height="18" rx="3"/><rect x="104" y="226" width="22" height="18" rx="3"/><rect x="132" y="226" width="22" height="18" rx="3"/>
+<rect x="76" y="248" width="22" height="18" rx="3"/><rect x="104" y="248" width="22" height="18" rx="3"/><rect x="132" y="248" width="22" height="18" rx="3"/>
+</g>
+<g class="t-mono"><text class="t-mono" x="242" y="174" text-anchor="end">R1</text><text class="t-mono" x="242" y="189" text-anchor="end">R2</text><text class="t-mono" x="242" y="204" text-anchor="end">R3</text><text class="t-mono" x="242" y="219" text-anchor="end">R4</text><text class="t-mono" x="242" y="234" text-anchor="end">C1</text><text class="t-mono" x="242" y="249" text-anchor="end">C2</text><text class="t-mono" x="242" y="264" text-anchor="end">C3</text></g>
+<path class="w sig" d="M250 170H400M250 185H400M250 200H400M250 215H400M250 230H400M250 245H400M250 260H400"/>
+
+<!-- Buzzer, button, lid reed -->
+<rect class="mod" x="130" y="295" width="120" height="30" rx="6"/><text x="142" y="315">Passive buzzer</text>
+<path class="w sig" d="M250 310H400"/>
+<rect class="mod" x="110" y="345" width="140" height="30" rx="6"/><text x="122" y="365">Button microswitch</text>
+<path class="w sen" d="M250 360H400"/>
+<rect class="mod" x="110" y="385" width="140" height="30" rx="6"/><text x="122" y="405">Lid reed switch</text>
+<path class="w sen" d="M250 400H400"/>
+<text class="t-muted" x="60" y="446">Other leg of buzzer, button and lid reed → GND rail.</text>
+<text class="t-muted" x="60" y="464">Keypad needs no GND or 5 V.</text>
+
+<!-- Servos, LEDs -->
+<rect class="mod" x="700" y="154" width="200" height="32" rx="6"/><text x="712" y="175">Lid latch servo (SG90)</text>
+<path class="w sig" d="M570 170H700"/>
+<rect class="mod" x="700" y="194" width="200" height="32" rx="6"/><text x="712" y="215">Lotus servo (SG90)</text>
+<path class="w sig" d="M570 210H700"/>
+<rect class="mod" x="700" y="234" width="200" height="32" rx="6"/><text x="712" y="255">NeoPixel ring, 8 LEDs</text>
+<path class="w sig" d="M570 250H615M645 250H700"/>
+<rect x="615" y="244" width="30" height="12" rx="2" fill="var(--panel)" stroke="var(--c-sig)" stroke-width="1.5"/>
+<text class="t-mono" x="630" y="238" text-anchor="middle">330Ω</text>
+<text class="t-muted" x="910" y="175">+5 V and GND</text><text class="t-muted" x="910" y="215">from the rail</text><text class="t-muted" x="910" y="255">(not the Uno)</text>
+
+<!-- I2C bus -->
+<path class="w i2c" d="M570 320H640M640 305V400H700M640 305H700"/>
+<path class="w i2c" d="M570 340H660M660 325V420H700M660 325H700"/>
+<circle cx="640" cy="320" r="3.5" fill="var(--c-i2c)"/><circle cx="660" cy="340" r="3.5" fill="var(--c-i2c)"/>
+<rect class="mod" x="700" y="290" width="200" height="50" rx="6"/>
+<text x="712" y="309" class="t-mono">SDA</text><text x="712" y="329" class="t-mono">SCL</text>
+<text x="760" y="320">LCD 16×2, I2C 0x27</text>
+
+<!-- PCF8574 -->
+<rect class="mod" x="700" y="380" width="170" height="220" rx="8"/>
+<text x="712" y="404" class="t-mono">SDA</text><text x="712" y="424" class="t-mono">SCL</text>
+<text class="t-head" x="712" y="470">PCF8574</text>
+<text class="t-muted" x="712" y="490">address 0x20</text>
+<text class="t-muted" x="712" y="508">A0 A1 A2 → GND</text>
+<g class="t-mono">
+<text class="t-mono" x="862" y="444" text-anchor="end">P0</text><text class="t-mono" x="862" y="464" text-anchor="end">P1</text><text class="t-mono" x="862" y="484" text-anchor="end">P2</text><text class="t-mono" x="862" y="504" text-anchor="end">P3</text>
+<text class="t-mono" x="862" y="524" text-anchor="end">P4</text><text class="t-mono" x="862" y="544" text-anchor="end">P5</text><text class="t-mono" x="862" y="564" text-anchor="end">P6</text><text class="t-mono" x="862" y="584" text-anchor="end">P7</text>
+</g>
+<path class="w sen" d="M870 440H895M870 460H895M870 480H895M870 500H895M870 520H895M870 540H895M870 560H895M870 580H895"/>
+<g>
+<rect class="reed" x="895" y="435" width="30" height="10" rx="5"/><rect class="reed" x="895" y="455" width="30" height="10" rx="5"/><rect class="reed" x="895" y="475" width="30" height="10" rx="5"/><rect class="reed" x="895" y="495" width="30" height="10" rx="5"/>
+<rect class="reed" x="895" y="515" width="30" height="10" rx="5"/><rect class="reed" x="895" y="535" width="30" height="10" rx="5"/><rect class="reed" x="895" y="555" width="30" height="10" rx="5"/><rect class="reed" x="895" y="575" width="30" height="10" rx="5"/>
+</g>
+<text x="935" y="444">Satya leaf</text><text x="935" y="464">Treta leaf</text><text x="935" y="484">Dwapara leaf</text><text x="935" y="504">Kali leaf</text>
+<text x="935" y="524">Band 1 (top)</text><text x="935" y="544">Band 2 (middle)</text><text x="935" y="564">Band 3 (bottom)</text><text x="935" y="584">Ring aligned</text>
+<text class="t-muted" x="895" y="420">Reed switches, other leg → GND</text>
+
+<!-- Power -->
+<rect class="mod" x="60" y="610" width="220" height="60" rx="8"/>
+<text class="t-head" x="74" y="634">5 V 3 A adapter</text>
+<text class="t-muted" x="74" y="654">DC jack screw terminal</text>
+<path class="w pwr" d="M280 628H1040"/>
+<path class="w gnd" d="M280 658H1040"/>
+<text class="t-mono" x="1044" y="632">+5V</text><text class="t-mono" x="1044" y="662">GND</text>
+<path class="w pwr" d="M570 470H600V628"/>
+<path class="w gnd" d="M570 500H615V658"/>
+<circle cx="600" cy="628" r="3.5" fill="var(--c-pwr)"/><circle cx="615" cy="658" r="3.5" fill="var(--c-gnd)"/>
+<path class="w pwr" d="M340 628V638"/><path class="w gnd" d="M340 658V648"/>
+<path d="M326 638H354M326 648H354" stroke="var(--ink)" stroke-width="2.4"/>
+<text class="t-mono" x="362" y="647">1000 µF</text>
+<text class="t-muted" x="420" y="690">Servos, NeoPixel ring, LCD and PCF8574 all take +5 V and GND from this rail.</text>
+<text class="t-muted" x="420" y="708">Every GND is joined, including the Uno's.</text>
+</svg>
+</div>
+<div class="note warn"><b>Power rule:</b> never run the two servos and the LED ring from the Uno's own 5 V pin. They draw too much current and the Uno will restart mid-game. Feed them from the 5 V adapter rail and join all the grounds.</div>
+
+<h2 id="parts">Parts list</h2>
+<div class="frame"><table>
+<thead><tr><th>Part</th><th>Qty</th><th>Used for</th></tr></thead>
+<tbody>
+<tr><td>Arduino Uno R3 + USB cable</td><td class="pin">1</td><td>The controller</td></tr>
+<tr><td>3×4 membrane keypad</td><td class="pin">1</td><td>Entering 1709</td></tr>
+<tr><td>16×2 LCD with I2C backpack</td><td class="pin">1</td><td>Step-by-step instructions</td></tr>
+<tr><td>PCF8574 I/O expander module</td><td class="pin">1</td><td>Reads the 8 leaf, band and ring sensors</td></tr>
+<tr><td>SG90 or MG90S micro servo</td><td class="pin">2</td><td>Lid latch and lotus push rod (MG90S has metal gears, stronger)</td></tr>
+<tr><td>WS2812B NeoPixel ring, 8 LEDs</td><td class="pin">1</td><td>Glow under the lotus in each yuga's metal colour</td></tr>
+<tr><td>Passive buzzer</td><td class="pin">1</td><td>Beeps and the opening tune</td></tr>
+<tr><td>Reed switch, normally open</td><td class="pin">10</td><td>4 leaves, 3 bands, 1 ring, 1 lid, 1 spare</td></tr>
+<tr><td>Neodymium disc magnet, 6×2 mm</td><td class="pin">10</td><td>One per reed switch</td></tr>
+<tr><td>Lever microswitch</td><td class="pin">1</td><td>Detects the pushed button</td></tr>
+<tr><td>5 V 3 A adapter + DC jack terminal</td><td class="pin">1</td><td>Power for everything</td></tr>
+<tr><td>1000 µF 10 V capacitor, 330 Ω resistor</td><td class="pin">1 each</td><td>Steady servo power, protects the LED data line</td></tr>
+<tr><td>Half breadboard or perfboard, jumper wires</td><td class="pin">1 + 40</td><td>Connections in the base</td></tr>
+<tr><td>Thin multicore or ribbon wire</td><td class="pin">1 m</td><td>The turning leaf ring and the fold-down wall</td></tr>
+</tbody></table></div>
+
+<h2 id="build">Build steps</h2>
+<p>Build the mechanical parts first and check that each one moves freely before you add any sensor.</p>
+
+<div class="part"><h3><span>Part A</span>Box, lid latch and lid sensor</h3>
+<ol class="steps">
+<li><div><b>Make a hollow base</b> about 20 × 20 cm and 6 cm deep with a removable bottom plate. This is the electronics bay.</div></li>
+<li><div><b>Hinge the four walls</b> to the base with fabric tape so they fold down, and hinge the lid to the back wall.</div></li>
+<li><div><b>Fit the latch.</b> Bend a paper-clip loop under the front edge of the lid. Mount the lid servo inside the top of the front wall so its horn hooks the loop at 0° and swings clear at 90°.</div></li>
+<li><div><b>Add the lid sensor.</b> Glue a magnet under the lid's front edge and a reed switch in the top of the front wall directly below it.</div></li>
+<li><div><b>Cut windows</b> in the front of the base for the keypad and the screen. Run the wall wires down through the hinge gap with a loose loop so the wall can fold.</div></li>
+</ol></div>
+
+<div class="part"><h3><span>Part B</span>Picture puzzle bands</h3>
+<ol class="steps">
+<li><div><b>Fix the core tube</b> (50 mm PVC pipe or a strong card tube) upright in the centre of the base.</div></li>
+<li><div><b>Make three card rings</b> slightly wider than the tube so they turn freely. Stack them with thin spacers between.</div></li>
+<li><div><b>Cut each yuga picture</b> into three horizontal strips. Glue the top strips of all four pictures around band 1, the middle strips around band 2 and the bottom strips around band 3, in the same order.</div></li>
+<li><div><b>Hide a magnet</b> inside each band behind the Satya strip. Tape a reed switch inside the tube at each band's height, at the front mark. When a band is turned to the correct spot, its switch closes.</div></li>
+<li><div><b>Cut four notches</b> in the lower edge of band 3. Only when the puzzle is solved do the notches sit over the four leaf sockets. Otherwise the band covers them and no leaf fits.</div></li>
+</ol></div>
+
+<div class="part"><h3><span>Part C</span>Leaf ring, sockets and leaves</h3>
+<ol class="steps">
+<li><div><b>Make the leaf ring</b> below the bands. Add a stopper peg so it can turn only about a quarter turn. That keeps its wires from twisting.</div></li>
+<li><div><b>Cut four shaped sockets</b> (circle, triangle, square, star), one per yuga, and glue a reed switch behind each.</div></li>
+<li><div><b>Make the leaves</b> from card covered in copper tape. Give each a peg of its yuga's shape with a magnet in the tip, so it only fits and only triggers its own socket.</div></li>
+<li><div><b>Line up the holes.</b> Drill a 10 mm hole in the ring and one in the core at the same height. Glue a magnet on the ring beside its hole and a reed switch on the core so it closes only when the holes line up.</div></li>
+<li><div><b>Route the ring wires</b> as one bundle through a slot into the tube and down to the bay, leaving a loose loop.</div></li>
+</ol></div>
+
+<div class="part"><h3><span>Part D</span>Push rod, lotus and button</h3>
+<ol class="steps">
+<li><div><b>Fit the push rod</b> (5 mm dowel or skewer) up the centre of the tube through two card guide discs.</div></li>
+<li><div><b>Mount the lotus servo</b> in the bay under the tube so its horn lifts the rod's foot about 2–3 cm. Do not glue the rod to the horn; it just rests on it (this matters for the manual override).</div></li>
+<li><div><b>Build the umbrella:</b> a collar on top of the rod, four ice-cream-stick struts from the collar to the petals, petals hinged at the rim with tape. Add a pen spring under the collar to help the petals close.</div></li>
+<li><div><b>Place the NeoPixel ring</b> on the top disc under the lotus, facing up, with its wires down the tube.</div></li>
+<li><div><b>Fit the microswitch</b> inside the tube opposite the button hole, so the button presses its lever only when pushed all the way in.</div></li>
+<li><div><b>Coin holders:</b> a small pocket on each petal, or a magnet if your coins stick to one.</div></li>
+</ol></div>
+
+<div class="part"><h3><span>Part E</span>Electronics bay</h3>
+<ol class="steps">
+<li><div><b>Mount the Uno, PCF8574 and breadboard</b> on the bottom plate with double-sided foam tape.</div></li>
+<li><div><b>Make the power rail</b> on the breadboard: adapter +5 V and GND in, capacitor across the rail (long leg to +5 V).</div></li>
+<li><div><b>Wire in this order,</b> testing after each: LCD and PCF8574 on I2C, keypad, reed switches, microswitch, servos, LED ring, buzzer. Follow the diagram above.</div></li>
+<li><div><b>Label every wire</b> with masking tape (for example "P2 Dwapara"). It saves a lot of time when something needs fixing.</div></li>
+</ol></div>
+
+<h2 id="test">Test and calibrate</h2>
+<ol class="steps">
+<li><div><b>Install the libraries</b> in Arduino IDE (Tools → Manage Libraries): Keypad, LiquidCrystal I2C, Adafruit NeoPixel. Upload <code>yuga_lotus_locker_v2.ino</code>.</div></li>
+<li><div><b>Enter test mode:</b> type <code>0000</code>. The screen shows every sensor live, for example <span class="mono">Lf1000 Bd110 R0</span>. A 1 means that magnet or button is detected.</div></li>
+<li><div><b>Check each sensor</b> by moving its magnet or pressing it and watching its digit change. Move reed switches closer if a digit does not change.</div></li>
+<li><div><b>Test the motors:</b> in test mode, <code>1</code> opens the latch, <code>2</code> opens the lotus, <code>3</code> closes both and <code>4</code> lights the LEDs. If a movement is too small or too big, change <code>LID_OPEN</code> or <code>LOTUS_OPEN</code> at the top of the code and upload again.</div></li>
+<li><div><b>Press * to leave test mode</b> and play through the whole game once.</div></li>
+</ol>
+
+<h2 id="manual">Manual override (no power needed)</h2>
+<p>All the puzzles are physical, so they keep working without electricity. Only the lid latch and the lotus need power, and each has a hidden manual release.</p>
+<div class="cols">
+<div class="part"><h3>Lid: hidden latch release</h3><p>Drill a 3 mm pin hole in the back wall where it lines up with the servo horn, and hide it behind a small carved slide. Push a straightened paper clip in to nudge the horn off the loop. An unpowered servo can be turned by hand.</p></div>
+<div class="part"><h3>Lotus: push from below</h3><p>The rod only rests on the servo horn, so it can be lifted without the motor. Leave a finger hole in the bay's bottom plate under the rod, or use a longer button with a ramp tip that lifts the rod by itself when pushed in.</p></div>
+<div class="part"><h3>Teacher code</h3><p>With power on, code <code>0000</code> opens test mode, where key <code>1</code> opens the latch and <code>2</code> opens the lotus without solving anything. Change <code>TEST_CODE</code> in the program before the children play.</p></div>
+</div>
+
+<h2 id="mech">Mechanical version with springs (no electronics)</h2>
+<p>This version needs no Arduino, no batteries and no wires. Springs do all the work: the lid pops up when the code is right, the walls spring open, the bands and ring click into place, and the lotus bursts open when the button trips a catch, like a jack-in-the-box.</p>
+
+<div class="frame"><table>
+<thead><tr><th>Stage</th><th>Mechanical lock</th><th>Springs used</th></tr></thead>
+<tbody>
+<tr><td class="stage">1 Code</td><td>Four number wheels on one axle. A spring-pulled bolt drops into their notches only at 1-7-0-9 and lets go of the lid.</td><td>Bolt spring, lid pop-up spring</td></tr>
+<tr><td class="stage">2 Walls</td><td>The lid holds the walls up. Once it lifts, the walls fold out on their own.</td><td>4 clothespin springs at the hinges</td></tr>
+<tr><td class="stage">3 Puzzle</td><td>Notches in the bottom band uncover the leaf sockets only when the pictures are whole.</td><td>3 click springs (one per band)</td></tr>
+<tr><td class="stage">4 Leaves</td><td>Shaped pegs fit only their own socket. The ring is smooth and sunk, so the leaves are the only handles.</td><td>1 click spring for the aligned holes</td></tr>
+<tr><td class="stage">5 Lotus</td><td>A strong spring pushes the rod up, held down by a catch. The button trips the catch.</td><td>Main lotus spring, catch spring, button return spring</td></tr>
+</tbody></table></div>
+
+<h3>Stage 1: combination dial lock</h3>
+<div class="cols">
+<div style="grid-column:1/-1"><div class="frame">
+<svg class="diagram sm" viewBox="0 0 900 380" role="img" aria-labelledby="d1T d1D">
+<title id="d1T">Combination dial lock, side view</title>
+<desc id="d1D">A number wheel with a notch in its rim. A sliding bolt rests against the rim, pulled toward the wheel by a spring. The far end of the bolt passes through the eye of a hook hanging from the lid. When the notch faces the bolt, the bolt slides in, leaves the hook's eye, and a spring under the lid pushes it up. A small top view shows four wheels on one axle and one bolt with four teeth.</desc>
+<circle class="mov" cx="170" cy="170" r="80"/>
+<rect x="238" y="160" width="14" height="20" fill="var(--panel)"/>
+<g stroke="var(--accent)" stroke-width="1.5">
+<line x1="170" y1="92" x2="170" y2="102"/><line x1="216" y1="107" x2="210" y2="115"/><line x1="245" y1="146" x2="236" y2="149"/><line x1="245" y1="194" x2="236" y2="191"/><line x1="216" y1="233" x2="210" y2="225"/>
+<line x1="170" y1="248" x2="170" y2="238"/><line x1="124" y1="233" x2="130" y2="225"/><line x1="95" y1="194" x2="104" y2="191"/><line x1="95" y1="146" x2="104" y2="149"/><line x1="124" y1="107" x2="130" y2="115"/>
+</g>
+<text x="170" y="122" text-anchor="middle" class="t-head">7</text>
+<circle cx="170" cy="170" r="6" fill="var(--ink)"/>
+<path d="M150 70H190L170 86Z" fill="var(--ink)"/>
+<text class="t-muted" x="200" y="74">window</text>
+<rect class="mov" x="252" y="162" width="300" height="16" rx="3"/>
+<rect class="fix" x="440" y="146" width="34" height="14"/><rect class="fix" x="440" y="180" width="34" height="14"/>
+<rect class="fix" x="290" y="112" width="12" height="44"/>
+<polyline class="spr" points="302,130 310,122 318,138 326,122 334,138 342,122 350,138 358,122 366,130 372,130 372,162"/>
+<circle cx="372" cy="166" r="3" fill="var(--ink)"/>
+<rect class="fix" x="480" y="30" width="330" height="20" rx="3"/>
+<text class="t-muted" x="700" y="24">lid</text>
+<path d="M535 50V150" stroke="var(--ink)" stroke-width="3" fill="none"/>
+<rect x="522" y="150" width="44" height="40" rx="6" fill="none" stroke="var(--ink)" stroke-width="3"/>
+<rect class="fix" x="620" y="84" width="46" height="230"/>
+<text class="t-muted" x="628" y="334">front wall</text>
+<polyline class="spr" points="643,50 631,56 655,62 631,68 655,74 631,80 643,84"/>
+<path d="M300 208H250" class="w sig" marker-end="url(#ah)"/>
+<text class="t-muted" x="262" y="226">slides in 1 cm</text>
+<path d="M740 90V56" class="w sig" marker-end="url(#ah)"/>
+<text class="t-muted" x="750" y="80">lid pops up</text>
+<defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.6"/></marker></defs>
+<g class="callout"><circle cx="92" cy="96" r="12"/><text x="92" y="100">1</text></g>
+<g class="callout"><circle cx="262" cy="140" r="12"/><text x="262" y="144">2</text></g>
+<g class="callout"><circle cx="336" cy="100" r="12"/><text x="336" y="104">3</text></g>
+<g class="callout"><circle cx="457" cy="126" r="12"/><text x="457" y="130">4</text></g>
+<g class="callout"><circle cx="505" cy="112" r="12"/><text x="505" y="116">5</text></g>
+<g class="callout"><circle cx="688" cy="62" r="12"/><text x="688" y="66">6</text></g>
+<line x1="60" y1="300" x2="330" y2="300" stroke="var(--ink)" stroke-width="3"/>
+<rect class="mov" x="90" y="272" width="14" height="56"/><rect class="mov" x="150" y="272" width="14" height="56"/><rect class="mov" x="210" y="272" width="14" height="56"/><rect class="mov" x="270" y="272" width="14" height="56"/>
+<rect class="mov" x="80" y="348" width="220" height="12" rx="2"/>
+<rect class="mov" x="92" y="334" width="10" height="14"/><rect class="mov" x="152" y="334" width="10" height="14"/><rect class="mov" x="212" y="334" width="10" height="14"/><rect class="mov" x="272" y="334" width="10" height="14"/>
+<text class="t-muted" x="350" y="304">Top view: four wheels on one axle,</text>
+<text class="t-muted" x="350" y="322">one bolt with a tooth for each wheel</text>
+</svg></div></div>
+<div><ol class="keylist">
+<li><b>Number wheel.</b> Digits 0–9 around the rim and one notch, cut where the rim faces the bolt when the correct digit is in the window.</li>
+<li><b>Bolt tooth</b> rests on the rim. It can only slide in when all four notches face it.</li>
+<li><b>Bolt spring</b> (rubber band or small tension spring) pulls the bolt toward the wheels.</li>
+</ol></div>
+<div><ol class="keylist" start="4">
+<li><b>Guides</b> (straw pieces) keep the bolt sliding straight.</li>
+<li><b>Lid hook.</b> A bent paper clip hangs from the lid. The bolt's end sits in its eye, so the lid stays shut.</li>
+<li><b>Lid pop-up spring</b> (from a ball pen) in a pocket on top of the wall. It lifts the lid as soon as the bolt lets go.</li>
+</ol></div>
+</div>
+
+<div class="part"><h3><span>Build</span>Dial lock</h3>
+<ol class="steps">
+<li><div><b>Cut four wheels</b> 6 cm across from three layers of card glued together (or foam board), each with a centre hole for a 5 mm dowel axle.</div></li>
+<li><div><b>Mark 0–9</b> evenly round each rim (every 36°). Mount the axle inside the front wall so one row of digits shows through a slot window.</div></li>
+<li><div><b>Cut the notches.</b> Turn wheel 1 to show <b>1</b>, wheel 2 to <b>7</b>, wheel 3 to <b>0</b> and wheel 4 to <b>9</b>. Mark the point on each rim that faces the bolt, then cut an 8 mm notch there.</div></li>
+<li><div><b>Make the bolt</b> from an ice-cream stick with four stick-piece teeth, one touching each wheel. Slide it through two straw guides and hook the spring on.</div></li>
+<li><div><b>Fit the hook and pop-up spring.</b> Glue a paper-clip hook under the lid so the bolt's end passes through its eye. Put a pen spring in a short straw pocket on top of the wall.</div></li>
+<li><div><b>Add a knob</b> (a bead on the bolt, poking out of the side) so you can pull the bolt back when relocking.</div></li>
+</ol>
+<p class="note">To change the code, cut new notches in fresh wheels. A washer between the wheels adds friction so they don't spin on their own.</p></div>
+
+<h3>Stages 2 to 4: walls, click-stops and leaf ring</h3>
+<div class="cols">
+<div class="part"><h3>Walls that spring open</h3><p>Take the springs out of four wooden clothespins. Tape one leg of each spring to the base and the other leg to the bottom of a wall, next to its hinge. The springs try to fold the walls outward, but a rim under the lid holds their tops in. When the lid pops up, the box opens out like a flower. Glue a small stopper so each wall stops flat.</p></div>
+<div class="part"><h3>Click-stops for the bands</h3><p>Push a pen spring and a bead into a short straw glued inside the tube at each band's height, so the bead presses out through a hole in the tube wall. Poke four shallow dimples inside each band, one per picture position. The band now clicks at every picture, which makes the puzzle feel precise.</p></div>
+<div class="part"><h3>Leaf ring and aligned holes</h3><p>Sink the ring slightly into a smooth sleeve so it can't be gripped: only the leaves can turn it. Give each leaf peg its yuga's shape (circle, triangle, square, star). Add one more bead click-stop with a single dimple, at the point where the ring hole lines up with the tube hole. Add a stopper peg so the ring turns only about a quarter turn.</p></div>
+</div>
+
+<h3>Stage 5: spring-loaded lotus trigger</h3>
+<div class="cols">
+<div style="grid-column:1/-1"><div class="frame">
+<svg class="diagram sm" viewBox="0 0 680 500" role="img" aria-labelledby="d2T d2D">
+<title id="d2T">Spring-loaded lotus, cross-section</title>
+<desc id="d2D">A strong spring under the rod's foot pushes the rod up. A catch lever pivoting on a pin holds a tooth in a notch in the rod, keeping it down. The button passes through the ring and tube holes and pushes the top of the lever, which swings the tooth out of the notch. The rod shoots up, pushing a collar and struts that open the petals. A small spring keeps the lever tooth in the notch, and another spring pushes the button back out.</desc>
+<defs><marker id="ah2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.6"/></marker></defs>
+<path d="M206 168 Q214 110 252 62" fill="none" stroke="var(--muted)" stroke-width="1" stroke-dasharray="4 4"/>
+<path d="M314 168 Q306 110 268 62" fill="none" stroke="var(--muted)" stroke-width="1" stroke-dasharray="4 4"/>
+<path class="petal" d="M206 168 Q150 150 120 70 Q170 110 214 160 Z"/>
+<path class="petal" d="M314 168 Q370 150 400 70 Q350 110 306 160 Z"/>
+<circle cx="150" cy="112" r="9" fill="#E3B341"/><circle cx="370" cy="112" r="9" fill="#C9CED6"/>
+<line x1="246" y1="140" x2="172" y2="120" stroke="var(--accent)" stroke-width="2.5"/>
+<line x1="278" y1="140" x2="348" y2="120" stroke="var(--accent)" stroke-width="2.5"/>
+<rect class="mov" x="244" y="134" width="36" height="12" rx="3"/>
+<circle cx="206" cy="168" r="3.5" fill="var(--ink)"/><circle cx="314" cy="168" r="3.5" fill="var(--ink)"/>
+<rect class="fix" x="200" y="170" width="8" height="200"/><rect class="fix" x="200" y="388" width="8" height="82"/>
+<rect class="fix" x="312" y="170" width="8" height="300"/><rect class="fix" x="200" y="470" width="120" height="8"/>
+<rect class="fix" x="208" y="250" width="48" height="6"/><rect class="fix" x="268" y="250" width="44" height="6"/>
+<rect class="band" x="184" y="190" width="14" height="50" rx="2"/><rect class="band" x="184" y="245" width="14" height="50" rx="2"/><rect class="band" x="184" y="300" width="14" height="50" rx="2"/>
+<rect class="band" x="322" y="190" width="14" height="50" rx="2"/><rect class="band" x="322" y="245" width="14" height="50" rx="2"/><rect class="band" x="322" y="300" width="14" height="50" rx="2"/>
+<rect class="fix" x="176" y="356" width="22" height="14"/><rect class="fix" x="176" y="388" width="22" height="14"/>
+<rect class="fix" x="322" y="356" width="22" height="46"/>
+<rect class="fix" x="344" y="375" width="28" height="8"/><ellipse class="fix" cx="394" cy="379" rx="22" ry="11"/>
+<rect class="mov" x="258" y="146" width="8" height="294"/>
+<rect x="256" y="408" width="5" height="10" fill="var(--panel)"/>
+<rect class="mov" x="244" y="440" width="36" height="6" rx="2"/>
+<polyline class="spr" points="262,446 278,450 246,454 278,458 246,462 278,466 262,470"/>
+<line x1="224" y1="372" x2="252" y2="412" stroke="var(--accent)" stroke-width="5" stroke-linecap="round"/>
+<rect class="mov" x="251" y="408" width="9" height="9"/>
+<circle cx="238" cy="392" r="4" fill="var(--ink)"/>
+<polyline class="spr" points="208,424 213,418 219,430 225,418 231,430 237,418 244,420"/>
+<rect class="mov" x="110" y="374" width="116" height="10"/>
+<rect class="mov" x="98" y="366" width="12" height="26" rx="2"/>
+<polyline class="spr" points="112,379 118,369 126,389 134,369 142,389 150,369 158,389 166,369 174,379"/>
+<path d="M50 379H90" class="w sig" marker-end="url(#ah2)"/>
+<path d="M290 300V250" class="w sig" marker-end="url(#ah2)"/>
+<g class="callout"><circle cx="96" cy="92" r="12"/><text x="96" y="96">1</text></g>
+<g class="callout"><circle cx="262" cy="114" r="12"/><text x="262" y="118">2</text></g>
+<g class="callout"><circle cx="288" cy="200" r="12"/><text x="288" y="204">3</text></g>
+<g class="callout"><circle cx="300" cy="458" r="12"/><text x="300" y="462">4</text></g>
+<g class="callout"><circle cx="286" cy="412" r="12"/><text x="286" y="416">5</text></g>
+<g class="callout"><circle cx="224" cy="450" r="12"/><text x="224" y="454">6</text></g>
+<g class="callout"><circle cx="118" cy="344" r="12"/><text x="118" y="348">7</text></g>
+<g class="callout"><circle cx="142" cy="412" r="12"/><text x="142" y="416">8</text></g>
+<g class="callout"><circle cx="166" cy="330" r="12"/><text x="166" y="334">9</text></g>
+<text class="t-muted" x="440" y="300">Push the petals closed:</text>
+<text class="t-muted" x="440" y="318">the rod goes down and the</text>
+<text class="t-muted" x="440" y="336">tooth clicks into the notch.</text>
+<text class="t-muted" x="440" y="370">Push the button:</text>
+<text class="t-muted" x="440" y="388">the tooth swings out and</text>
+<text class="t-muted" x="440" y="406">the spring shoots the rod up.</text>
+</svg></div></div>
+<div><ol class="keylist">
+<li><b>Copper petals</b>, taped hinges at the rim, a coin pocket on each.</li>
+<li><b>Collar and struts</b> open the petals like umbrella ribs.</li>
+<li><b>Push rod</b> with a notch near its foot.</li>
+<li><b>Main lotus spring</b> under the foot, squeezed when the lotus is closed.</li>
+<li><b>Catch lever</b> on a toothpick pivot. Its tooth sits in the rod's notch and holds the spring down.</li>
+</ol></div>
+<div><ol class="keylist" start="6">
+<li><b>Catch spring</b> keeps the tooth pressed into the notch.</li>
+<li><b>Button</b> (8 mm dowel) through the ring hole and tube hole. Its tip presses the top of the lever.</li>
+<li><b>Button spring</b> pushes the button back out after use.</li>
+<li><b>Leaf ring</b>. Its hole must line up with the tube hole, or the button can't reach the lever.</li>
+</ol></div>
+</div>
+
+<div class="part"><h3><span>Build</span>Lotus trigger</h3>
+<ol class="steps">
+<li><div><b>Make the rod</b> from a 5 mm dowel. Glue a card disc (the foot) near the bottom and cut a 3 mm notch 2 cm above the foot.</div></li>
+<li><div><b>Put the main spring</b> in the bottom of the tube, under the foot. A 30–40 mm compression spring from a spring kit, or the spring from a stapler, works well.</div></li>
+<li><div><b>Fit the catch lever</b>, a 5 cm piece of ice-cream stick. Push a toothpick through the tube wall as its pivot. Glue a small tooth on its lower end and add a pen spring behind it.</div></li>
+<li><div><b>Line up the button hole.</b> Drill the tube hole at exactly the height of the lever's top end, so the button presses the lever and not the rod.</div></li>
+<li><div><b>Limit the stroke.</b> Glue a stop collar on the rod so it can only rise 2–3 cm. Otherwise it can fling the petals off their hinges.</div></li>
+<li><div><b>Cock it:</b> close the petals by hand and press down until you hear the click. Test the button several times before you add the coins.</div></li>
+</ol>
+<p class="note warn">Start with a gentle spring. If the lotus snaps open too hard, cut a coil off the spring or use a weaker one. Keep fingers out of the petals when you press the button.</p></div>
+
+<h3>Springs you need</h3>
+<div class="frame"><table>
+<thead><tr><th>Spring</th><th>Qty</th><th>Job</th><th>Easy source</th></tr></thead>
+<tbody>
+<tr><td>Bolt spring</td><td class="pin">1</td><td>Pulls the bolt into the wheel notches</td><td>Rubber band or small tension spring</td></tr>
+<tr><td>Lid pop-up spring</td><td class="pin">1–2</td><td>Lifts the lid when the bolt lets go</td><td>Retractable ball-pen spring</td></tr>
+<tr><td>Wall springs</td><td class="pin">4</td><td>Fold the walls open</td><td>Wooden clothespins</td></tr>
+<tr><td>Click-stop springs</td><td class="pin">4</td><td>Click for each band position and the aligned ring</td><td>Pen springs with small beads</td></tr>
+<tr><td>Main lotus spring</td><td class="pin">1</td><td>Shoots the rod up</td><td>Stapler spring or a 30–40 mm spring from a spring kit</td></tr>
+<tr><td>Catch spring</td><td class="pin">1</td><td>Keeps the tooth in the notch</td><td>Pen spring or small rubber band</td></tr>
+<tr><td>Button spring</td><td class="pin">1</td><td>Pushes the button back out</td><td>Pen spring slid over the dowel</td></tr>
+</tbody></table></div>
+
+<div class="part"><h3><span>Reset</span>Locking the mechanical box again</h3>
+<ol class="steps">
+<li><div>Put the coins back and press the petals closed until the catch clicks.</div></li>
+<li><div>Turn the ring back with the leaves, then pull the leaves out.</div></li>
+<li><div>Turn the picture bands to mix up the pictures.</div></li>
+<li><div>Lift the walls up and hold them. Pull the bolt knob back, close the lid (squeezing its spring), then let the bolt go into the hook's eye.</div></li>
+<li><div>Spin the number wheels away from 1-7-0-9.</div></li>
+</ol></div>
+
+<h2 id="play">How to play</h2>
+<div class="play"><h3>For the player</h3>
+<ol>
+<li>Type the secret code on the keypad. The lid unlocks. Open it and fold the walls down.</li>
+<li>Turn the three picture bands until all four yuga pictures are whole. The screen shows a Y for each correct band.</li>
+<li>Match each leaf to its yuga socket and push it in. The lotus lights up in that yuga's metal colour.</li>
+<li>Use the leaves as handles and turn the ring until the screen says the holes line up.</li>
+<li>Push the button all the way in. The lotus opens: collect a coin from each petal.</li>
+<li>Press * to close the lotus, take the leaves out and close the lid. The box locks itself.</li>
+</ol></div>
+
+<h2 id="fix">Troubleshooting</h2>
+<div class="frame"><table>
+<thead><tr><th>Problem</th><th>Likely cause</th><th>Fix</th></tr></thead>
+<tbody>
+<tr><td>Screen is lit but blank</td><td>Contrast or address</td><td>Turn the blue screw on the backpack; change <code>LCD_ADDR</code> to 0x3F</td></tr>
+<tr><td>Uno restarts when a servo moves</td><td>Servos on the Uno's 5 V pin</td><td>Power servos from the rail, add the 1000 µF capacitor</td></tr>
+<tr><td>A sensor digit never changes</td><td>Magnet too far, or wire not to GND</td><td>Magnet within about 5 mm, side-on to the reed; check its GND leg</td></tr>
+<tr><td>All eight PCF digits stuck</td><td>Wrong address or SDA/SCL swapped</td><td>A0–A2 jumpers to GND (0x20); swap the two I2C wires</td></tr>
+<tr><td>A digit flickers</td><td>Long wire picks up noise</td><td>Add a 10 kΩ resistor from that P pin to +5 V</td></tr>
+<tr><td>Wrong keys typed</td><td>Keypad pins in a different order</td><td>Swap the order in <code>rowPins</code> and <code>colPins</code></td></tr>
+<tr><td>LEDs dark or wrong colours</td><td>Data wire on the output side, or colour order</td><td>Use the DIN pad; try <code>NEO_RGB</code> instead of <code>NEO_GRB</code></td></tr>
+<tr><td>Servo buzzes or jitters</td><td>Grounds not joined</td><td>Connect the adapter GND to the Uno GND</td></tr>
+</tbody></table></div>
+
+<h2 id="code">Arduino code</h2>
+<p>The same program is attached as <code>yuga_lotus_locker_v2.ino</code>.</p>
+<details><summary>Show the full program</summary>
+<div class="codebar"><button id="copyBtn" type="button">Copy code</button></div>
+<pre id="code-block">/*
+  Yuga Lotus Locker v2 - Arduino Uno, every puzzle stage has a sensor
+  ------------------------------------------------------------------
+  Stage 1  Code 1709 on the keypad          -&gt; lid latch servo opens
+  Stage 2  Picture puzzle: 3 turning bands   -&gt; 3 reed switches (one per band)
+  Stage 3  Four yuga leaves in their sockets -&gt; 4 reed switches
+  Stage 4  Ring turned until holes line up   -&gt; 1 reed switch
+  Stage 5  Button pushed through the holes   -&gt; microswitch -&gt; lotus servo opens petals
+  Reset    * closes the lotus. Take the leaves out and close the lid:
+           the box locks itself (lid reed switch).
+  Test     Type 0000 when locked to see every sensor live on the screen.
+           In test mode: 1 = open latch, 2 = open lotus, 3 = close both,
+           4 = light test, * = leave test mode.
+
+  Libraries (Arduino IDE &gt; Tools &gt; Manage Libraries):
+    Keypad (Mark Stanley), LiquidCrystal I2C (Frank de Brabander),
+    Adafruit NeoPixel (Adafruit). Servo and Wire are built in.
+
+  Wiring (Arduino Uno)
+    Keypad 3x4           rows D2 D3 D4 D5, cols D6 D7 D8
+    Lid latch servo      D9   (power from the 5 V supply)
+    Lotus servo          D10  (power from the 5 V supply)
+    NeoPixel ring (8)    D11 through a 330 ohm resistor
+    Buzzer               D12
+    Button microswitch   A0 -&gt; GND
+    Lid closed reed      A1 -&gt; GND
+    I2C bus              A4 = SDA, A5 = SCL -&gt; LCD (0x27) and PCF8574 (0x20)
+    PCF8574 inputs (each switch goes to GND):
+      P0 Satya leaf, P1 Treta leaf, P2 Dwapara leaf, P3 Kali leaf,
+      P4 band 1 (top), P5 band 2 (middle), P6 band 3 (bottom), P7 ring aligned
+*/
+
+#include &lt;Keypad.h&gt;
+#include &lt;Servo.h&gt;
+#include &lt;Wire.h&gt;
+#include &lt;LiquidCrystal_I2C.h&gt;
+#include &lt;Adafruit_NeoPixel.h&gt;
+
+// ---------- settings you can change ----------
+const char SECRET_CODE[] = &quot;1709&quot;;
+const char TEST_CODE[]   = &quot;0000&quot;;
+const int LID_LOCKED   = 0;     // latch servo angles
+const int LID_OPEN     = 90;
+const int LOTUS_CLOSED = 10;    // lotus servo angles: rod should rise 2-3 cm
+const int LOTUS_OPEN   = 150;
+const byte LCD_ADDR = 0x27;     // try 0x3F if the screen is blank
+const byte PCF_ADDR = 0x20;     // PCF8574 with A0 A1 A2 set to GND
+
+// ---------- pins ----------
+const byte ROWS = 4, COLS = 3;
+char keys[ROWS][COLS] = {{&#x27;1&#x27;,&#x27;2&#x27;,&#x27;3&#x27;},{&#x27;4&#x27;,&#x27;5&#x27;,&#x27;6&#x27;},{&#x27;7&#x27;,&#x27;8&#x27;,&#x27;9&#x27;},{&#x27;*&#x27;,&#x27;0&#x27;,&#x27;#&#x27;}};
+byte rowPins[ROWS] = {2, 3, 4, 5};
+byte colPins[COLS] = {6, 7, 8};
+Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
+
+const byte PIN_LID_SERVO = 9, PIN_LOTUS_SERVO = 10, PIN_LEDS = 11, PIN_BUZZER = 12;
+const byte PIN_BUTTON = A0, PIN_LID_CLOSED = A1;
+
+// PCF8574 bit numbers
+const byte BIT_LEAF[4] = {0, 1, 2, 3};
+const byte BIT_BAND[3] = {4, 5, 6};
+const byte BIT_RING = 7;
+
+// ---------- yuga data ----------
+const char* YUGA_NAME[4] = {&quot;Satya Yuga&quot;, &quot;Treta Yuga&quot;, &quot;Dwapara Yuga&quot;, &quot;Kali Yuga&quot;};
+const char* YUGA_COIN[4] = {&quot;Gold coin&quot;, &quot;Silver coin&quot;, &quot;Copper coin&quot;, &quot;Iron coin&quot;};
+const uint8_t YUGA_RGB[4][3] = {{255,170,0},{190,200,220},{230,100,40},{80,90,110}};
+
+LiquidCrystal_I2C lcd(LCD_ADDR, 16, 2);
+Adafruit_NeoPixel leds(8, PIN_LEDS, NEO_GRB + NEO_KHZ800);
+Servo lidServo, lotusServo;
+
+enum State { LOCKED, LOCKOUT, PUZZLE, LEAVES, RING, BUTTON, OPEN, RESETTING, TEST };
+State state = LOCKED;
+
+char entered[5];
+byte codeLen = 0, wrongTries = 0, coinShown = 0;
+byte lastInputs = 0xFF;
+bool leafIn[4] = {false, false, false, false};
+int lotusPos = LOTUS_CLOSED;
+unsigned long timer = 0;
+
+// ---------- inputs ----------
+byte readPCF() {                       // returns 8 bits, 0 = switch closed
+  Wire.requestFrom(PCF_ADDR, (byte)1);
+  if (Wire.available()) lastInputs = Wire.read();
+  return lastInputs;
+}
+bool pcfClosed(byte bit) {
+  byte a = readPCF(); delay(5); byte b = readPCF();
+  return !(a &amp; (1 &lt;&lt; bit)) &amp;&amp; !(b &amp; (1 &lt;&lt; bit));
+}
+bool pinClosed(byte pin) {
+  if (digitalRead(pin) != LOW) return false;
+  delay(10);
+  return digitalRead(pin) == LOW;
+}
+int bandsSolved() { int n = 0; for (byte i = 0; i &lt; 3; i++) if (pcfClosed(BIT_BAND[i])) n++; return n; }
+int leavesIn()    { int n = 0; for (byte i = 0; i &lt; 4; i++) if (pcfClosed(BIT_LEAF[i])) n++; return n; }
+
+// ---------- outputs ----------
+void show(const char* a, const char* b = &quot;&quot;) {
+  lcd.clear(); lcd.setCursor(0, 0); lcd.print(a); lcd.setCursor(0, 1); lcd.print(b);
+}
+void beep(int f, int ms) { tone(PIN_BUZZER, f, ms); delay(ms + 20); }
+void allLeds(uint8_t r, uint8_t g, uint8_t b) { for (byte i = 0; i &lt; 8; i++) leds.setPixelColor(i, r, g, b); leds.show(); }
+void yugaLeds(byte k, bool on) {       // 2 LEDs per yuga: LEDs 2k and 2k+1
+  for (byte j = 0; j &lt; 2; j++)
+    leds.setPixelColor(k * 2 + j, on ? YUGA_RGB[k][0] : 0, on ? YUGA_RGB[k][1] : 0, on ? YUGA_RGB[k][2] : 0);
+  leds.show();
+}
+void moveSlow(Servo &amp;s, int &amp;pos, int target, int stepMs) {
+  while (pos != target) { pos += (target &gt; pos) ? 1 : -1; s.write(pos); delay(stepMs); }
+}
+void showCodePrompt() {
+  char line[17] = &quot;Code: &quot;;
+  for (byte i = 0; i &lt; codeLen; i++) strcat(line, &quot;*&quot;);
+  show(&quot;Yuga Lotus Box&quot;, line);
+}
+
+// ---------- stage changes ----------
+void goLocked() {
+  lidServo.write(LID_LOCKED);
+  allLeds(0, 0, 0);
+  codeLen = 0;
+  for (byte i = 0; i &lt; 4; i++) leafIn[i] = false;
+  state = LOCKED;
+  showCodePrompt();
+}
+void goPuzzle() {
+  wrongTries = 0;
+  beep(880, 120); beep(1175, 200);
+  lidServo.write(LID_OPEN);
+  show(&quot;Unlocked!&quot;, &quot;Open the box&quot;);
+  delay(2000);
+  timer = 0;
+  state = PUZZLE;
+}
+void goLeaves() {
+  show(&quot;Puzzle solved!&quot;, &quot;Attach the leaves&quot;);
+  beep(988, 120); beep(1319, 250);
+  allLeds(0, 0, 0);
+  state = LEAVES;
+}
+void goRing()   { show(&quot;All 4 leaves in!&quot;, &quot;Turn the ring&quot;); beep(1047, 120); beep(1397, 250); state = RING; }
+void goButton() { show(&quot;Holes lined up!&quot;, &quot;Push the button&quot;); beep(1319, 120); beep(1568, 300); state = BUTTON; }
+void goOpen() {
+  show(&quot;The lotus opens&quot;, &quot;...&quot;);
+  for (byte k = 0; k &lt; 4; k++) yugaLeds(k, true);
+  moveSlow(lotusServo, lotusPos, LOTUS_OPEN, 15);
+  int notes[] = {523, 659, 784, 1047, 784, 1047}, lens[] = {150, 150, 150, 300, 150, 450};
+  for (byte i = 0; i &lt; 6; i++) beep(notes[i], lens[i]);
+  coinShown = 0; timer = 0;
+  state = OPEN;
+}
+
+// ---------- test mode screen ----------
+void showTest() {
+  byte v = readPCF();
+  char l1[17], l2[17];
+  // 1 = closed (magnet present / pressed), 0 = open
+  snprintf(l1, sizeof(l1), &quot;Lf%d%d%d%d Bd%d%d%d R%d&quot;,
+           !(v &amp; 1), !(v &gt;&gt; 1 &amp; 1), !(v &gt;&gt; 2 &amp; 1), !(v &gt;&gt; 3 &amp; 1),
+           !(v &gt;&gt; 4 &amp; 1), !(v &gt;&gt; 5 &amp; 1), !(v &gt;&gt; 6 &amp; 1), !(v &gt;&gt; 7 &amp; 1));
+  snprintf(l2, sizeof(l2), &quot;Btn%d Lid%d *=out&quot;, digitalRead(PIN_BUTTON) == LOW, digitalRead(PIN_LID_CLOSED) == LOW);
+  lcd.setCursor(0, 0); lcd.print(l1); lcd.print(&quot;   &quot;);
+  lcd.setCursor(0, 1); lcd.print(l2);
+}
+
+// ---------- setup ----------
+void setup() {
+  pinMode(PIN_BUTTON, INPUT_PULLUP);
+  pinMode(PIN_LID_CLOSED, INPUT_PULLUP);
+  pinMode(PIN_BUZZER, OUTPUT);
+  Wire.begin();
+  Wire.beginTransmission(PCF_ADDR); Wire.write(0xFF); Wire.endTransmission();   // all PCF pins as inputs
+  lcd.init(); lcd.backlight();
+  leds.begin(); leds.setBrightness(80); leds.show();
+  lidServo.attach(PIN_LID_SERVO);
+  lotusServo.attach(PIN_LOTUS_SERVO);
+  lotusServo.write(LOTUS_CLOSED);
+  show(&quot;Yuga Lotus Box&quot;, &quot;Welcome!&quot;);
+  delay(1500);
+  goLocked();
+}
+
+// ---------- main loop ----------
+void loop() {
+  char key = keypad.getKey();
+
+  switch (state) {
+
+    case LOCKED:
+      if (key &gt;= &#x27;0&#x27; &amp;&amp; key &lt;= &#x27;9&#x27; &amp;&amp; codeLen &lt; 4) {
+        entered[codeLen++] = key; entered[codeLen] = &#x27;\0&#x27;;
+        beep(1200, 40);
+        showCodePrompt();
+        if (codeLen == 4) {
+          delay(300);
+          if (strcmp(entered, SECRET_CODE) == 0) goPuzzle();
+          else if (strcmp(entered, TEST_CODE) == 0) { state = TEST; lcd.clear(); }
+          else {
+            wrongTries++;
+            beep(200, 500); show(&quot;Wrong code&quot;, &quot;Try again&quot;); delay(1200);
+            codeLen = 0;
+            if (wrongTries &gt;= 3) { state = LOCKOUT; timer = millis(); } else showCodePrompt();
+          }
+        }
+      } else if (key == &#x27;*&#x27;) { codeLen = 0; showCodePrompt(); }
+      break;
+
+    case LOCKOUT: {
+      unsigned long left = 10 - (millis() - timer) / 1000;
+      char line[17]; snprintf(line, sizeof(line), &quot;Wait %lu sec   &quot;, left);
+      lcd.setCursor(0, 0); lcd.print(&quot;Too many tries  &quot;);
+      lcd.setCursor(0, 1); lcd.print(line);
+      if (millis() - timer &gt;= 10000) { wrongTries = 0; state = LOCKED; showCodePrompt(); }
+      delay(200);
+      break;
+    }
+
+    case PUZZLE:                      // update the screen twice a second
+      if (millis() - timer &gt; 500) {
+        timer = millis();
+        char line[17];
+        bool b[3];
+        for (byte i = 0; i &lt; 3; i++) b[i] = pcfClosed(BIT_BAND[i]);
+        snprintf(line, sizeof(line), &quot;Bands %c %c %c&quot;, b[0] ? &#x27;Y&#x27; : &#x27;-&#x27;, b[1] ? &#x27;Y&#x27; : &#x27;-&#x27;, b[2] ? &#x27;Y&#x27; : &#x27;-&#x27;);
+        lcd.setCursor(0, 0); lcd.print(&quot;Solve the puzzle&quot;);
+        lcd.setCursor(0, 1); lcd.print(line); lcd.print(&quot;    &quot;);
+        for (byte i = 0; i &lt; 3; i++) leds.setPixelColor(i, b[i] ? 0 : 40, b[i] ? 120 : 0, 0);
+        leds.show();
+        if (b[0] &amp;&amp; b[1] &amp;&amp; b[2]) goLeaves();
+      }
+      break;
+
+    case LEAVES:
+      for (byte i = 0; i &lt; 4; i++) {
+        bool now = pcfClosed(BIT_LEAF[i]);
+        if (now &amp;&amp; !leafIn[i]) {
+          leafIn[i] = true; yugaLeds(i, true);
+          char line[17]; snprintf(line, sizeof(line), &quot;%d of 4 leaves&quot;, leavesIn());
+          show(YUGA_NAME[i], line);
+          beep(1000 + i * 150, 150);
+        } else if (!now &amp;&amp; leafIn[i]) { leafIn[i] = false; yugaLeds(i, false); }
+      }
+      if (leavesIn() == 4) goRing();
+      break;
+
+    case RING:
+      if (leavesIn() &lt; 4) { show(&quot;A leaf came out&quot;, &quot;Put it back&quot;); state = LEAVES; }
+      else if (pcfClosed(BIT_RING)) goButton();
+      break;
+
+    case BUTTON:
+      if (!pcfClosed(BIT_RING)) { show(&quot;Ring moved&quot;, &quot;Line holes up&quot;); state = RING; }
+      else if (pinClosed(PIN_BUTTON)) goOpen();
+      break;
+
+    case OPEN:
+      if (millis() - timer &gt; 2500) {
+        timer = millis();
+        show(YUGA_NAME[coinShown], YUGA_COIN[coinShown]);
+        allLeds(0, 0, 0); yugaLeds(coinShown, true);
+        coinShown = (coinShown + 1) % 4;
+        if (coinShown == 0) { delay(2500); show(&quot;Collect coins!&quot;, &quot;* to close&quot;); for (byte k = 0; k &lt; 4; k++) yugaLeds(k, true); timer = millis(); }
+      }
+      if (key == &#x27;*&#x27;) {
+        moveSlow(lotusServo, lotusPos, LOTUS_CLOSED, 12);
+        show(&quot;Take out leaves&quot;, &quot;then close lid&quot;);
+        allLeds(0, 0, 0);
+        state = RESETTING;
+      }
+      break;
+
+    case RESETTING:                   // locks by itself once leaves are out and lid is shut
+      if (leavesIn() == 0 &amp;&amp; pinClosed(PIN_LID_CLOSED)) {
+        delay(800);
+        if (pinClosed(PIN_LID_CLOSED)) { beep(700, 100); goLocked(); }
+      }
+      break;
+
+    case TEST:
+      showTest();
+      if (key == &#x27;1&#x27;) lidServo.write(LID_OPEN);
+      if (key == &#x27;2&#x27;) moveSlow(lotusServo, lotusPos, LOTUS_OPEN, 8);
+      if (key == &#x27;3&#x27;) { lidServo.write(LID_LOCKED); moveSlow(lotusServo, lotusPos, LOTUS_CLOSED, 8); }
+      if (key == &#x27;4&#x27;) { for (byte k = 0; k &lt; 4; k++) yugaLeds(k, true); delay(1500); allLeds(0, 0, 0); }
+      if (key == &#x27;*&#x27;) { lidServo.write(LID_LOCKED); moveSlow(lotusServo, lotusPos, LOTUS_CLOSED, 8); goLocked(); }
+      delay(100);
+      break;
+  }
+}
+</pre>
+</details>
+</div>
+<script>
+document.getElementById('copyBtn').addEventListener('click',async e=>{
+  const b=e.currentTarget,txt=document.getElementById('code-block').textContent;
+  try{await navigator.clipboard.writeText(txt);b.textContent='Copied';}
+  catch(err){const r=document.createRange();r.selectNodeContents(document.getElementById('code-block'));const s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent='Selected, press Ctrl+C';}
+  setTimeout(()=>b.textContent='Copy code',2500);
+});
+</script>
