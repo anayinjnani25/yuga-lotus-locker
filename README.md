@@ -12,6 +12,11 @@ npm run dev
 
 Then open http://localhost:5173. To build static files for hosting: `npm run build` (output in `dist/`).
 
+Live site: https://anayinjnani25.github.io/yuga-lotus-locker/
+
+To publish changes: commit and push your source to `main`, then run `npm run deploy`. It builds the site and
+pushes `dist/` to the `gh-pages` branch, which GitHub Pages serves.
+
 Checks:
 
 | Command | What it does |

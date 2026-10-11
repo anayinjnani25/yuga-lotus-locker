@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "check:pins": "node scripts/check-pins.mjs",
     "shots": "node scripts/shots.mjs",
-    "test:ui": "node scripts/interact.mjs"
+    "test:ui": "node scripts/interact.mjs",
+    "deploy": "sh scripts/deploy.sh"
   },
   "dependencies": {
     "@react-three/drei": "9.114.0",
