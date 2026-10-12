@@ -411,3 +411,50 @@ pre.code .ln { display: inline-block; width: 3.2em; padding-right: 1em; text-ali
 
 .scroll-hint { display: none; font-size: .8rem; color: var(--muted); margin: 0 0 6px; }
 @media (max-width: 960px) { .scroll-hint { display: block; } }
+
+/* ───────── mechanisms page ───────── */
+.mech-family { scroll-margin-top: calc(var(--head-h) + 12px); }
+.mech-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+.mech-card { background: var(--card); border: 1.5px solid var(--line); border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; }
+.mech-anim { background: var(--bg); border-bottom: 1.5px solid var(--line); padding: 8px 12px; }
+.mech-anim svg { display: block; width: 100%; height: auto; max-height: 150px; overflow: visible; }
+.mech-text { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+.mech-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.mech-head h3 { margin: 0; font-size: 1.12rem; }
+.mech-text p { margin: 0; }
+.mech-text dl { margin: 2px 0; display: grid; grid-template-columns: auto 1fr; gap: 3px 10px; font-size: .9rem; }
+.mech-text dt { color: var(--muted); font-weight: 800; font-size: .78rem; text-transform: uppercase; letter-spacing: .04em; padding-top: 2px; }
+.mech-text dd { margin: 0; }
+.mech-text .related { margin-top: auto; padding-top: 6px; }
+.mech-text .rel { font-size: .8rem; }
+.lvl { font-size: .7rem; font-weight: 800; border-radius: 999px; padding: 2px 8px; white-space: nowrap; }
+.lvl-easy { background: color-mix(in srgb, #2FB36B 18%, transparent); color: #2a8a52; }
+.lvl-medium { background: color-mix(in srgb, #E0A060 22%, transparent); color: #a8662f; }
+.lvl-tricky { background: color-mix(in srgb, #D8402F 16%, transparent); color: #b3261e; }
+:root[data-theme="dark"] .lvl-easy { color: #7fdca6; } :root[data-theme="dark"] .lvl-medium { color: #f0c48a; } :root[data-theme="dark"] .lvl-tricky { color: #f2b8b5; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .lvl-easy { color: #7fdca6; } :root:not([data-theme="light"]) .lvl-medium { color: #f0c48a; } :root:not([data-theme="light"]) .lvl-tricky { color: #f2b8b5; } }
+
+/* generic diagram motion: values come from --a (angle), --d (distance), --s (scale), --dl (delay) */
+@keyframes m-rot { 0%, 15% { transform: rotate(0); } 45%, 70% { transform: rotate(var(--a)); } 100% { transform: rotate(0); } }
+@keyframes m-tx { 0%, 15% { transform: translateX(0); } 45%, 70% { transform: translateX(var(--d)); } 100% { transform: translateX(0); } }
+@keyframes m-ty { 0%, 15% { transform: translateY(0); } 45%, 70% { transform: translateY(var(--d)); } 100% { transform: translateY(0); } }
+@keyframes m-sx { 0%, 15% { transform: scaleX(1); } 45%, 70% { transform: scaleX(var(--s)); } 100% { transform: scaleX(1); } }
+@keyframes m-sy { 0%, 15% { transform: scaleY(1); } 45%, 70% { transform: scaleY(var(--s)); } 100% { transform: scaleY(1); } }
+@keyframes m-spin { to { transform: rotate(360deg); } }
+@keyframes m-push { 0%, 10% { transform: translateX(0); } 25%, 35% { transform: translateX(-12px); } 50%, 75% { transform: translateX(22px); } 100% { transform: translateX(0); } }
+@keyframes m-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(14px); } }
+.m-rot, .m-tx, .m-ty, .m-sx, .m-sy { animation: 3.4s ease-in-out var(--dl, 0s) infinite; }
+.m-rot { animation-name: m-rot; } .m-tx { animation-name: m-tx; } .m-ty { animation-name: m-ty; }
+.m-sx { animation-name: m-sx; } .m-sy { animation-name: m-sy; }
+.m-tx, .m-ty { transform-box: view-box; }
+.m-spin { animation: m-spin 6s ease-in-out infinite; }
+.m-spin.linear { animation-timing-function: linear; animation-duration: 3.4s; }
+.m-spin.rev { animation-direction: reverse; }
+.m-spin.steps8 { animation: m-spin 4s steps(8) infinite; }
+.m-tx.steps { animation-timing-function: steps(2, jump-none); animation-duration: 3s; }
+.m-tx.snap, .m-ty.snap { animation-timing-function: cubic-bezier(.7, 0, .2, 1.4); }
+.m-rot.alt, .m-tx.alt, .m-ty.alt, .m-sx.alt { animation-duration: 2.4s; }
+.m-rot.fast { animation-duration: .5s; }
+.m-sx.slow { animation-duration: 3.2s; }
+.m-push { animation: m-push 3.4s ease-in-out infinite; }
+.m-bob { animation: m-bob 3.4s ease-in-out infinite; }

@@ -48,7 +48,7 @@ export default function BuildPage() {
   return (
     <>
       <h1>Build guide</h1>
-      <p className="lede">How to build both versions of the box: the electronic one with an Arduino, and the spring-powered one with no electronics at all. Underlined part names open that part in 3D.</p>
+      <p className="lede">How to build both versions of the box: the electronic one with an Arduino, and the spring-powered one with no electronics at all. Underlined part names open that part in 3D. For other hinges, springs and catches you could use, see <a href="#/mechanisms">Mechanisms</a>.</p>
       <nav className="toc" aria-label="On this page">
         {[['parts', 'Parts list'], ['springs', 'Springs'], ['electronic', 'Electronic build'], ['mechanical', 'Mechanical build'], ['test', 'Test mode'], ['override', 'Manual override'], ['play', 'How to play'], ['fix', 'Troubleshooting']].map(([id, t]) => (
           <a key={id} href="#/build" onClick={(e) => { e.preventDefault(); document.getElementById('b-' + id)?.scrollIntoView({ behavior: 'smooth' }); }}>{t}</a>

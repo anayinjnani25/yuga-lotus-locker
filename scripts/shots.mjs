@@ -19,6 +19,7 @@ const pages = [
   ['circuit', '#/circuit', 1500],
   ['code', '#/code', 1500],
   ['yugas', '#/yugas', 2500],
+  ['mechanisms', '#/mechanisms', 2000],
   ['build', '#/build', 1500],
 ];
 const browser = await chromium.launch({ channel: process.env.PW_CHANNEL || 'msedge', args: (process.env.PW_ARGS || '--use-angle=d3d11 --enable-gpu --ignore-gpu-blocklist --headless=new').split(' ') });

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export type Route = 'explore' | 'how' | 'circuit' | 'code' | 'yugas' | 'build';
+export type Route = 'explore' | 'how' | 'circuit' | 'code' | 'yugas' | 'mechanisms' | 'build';
 export type Mode = 'electronic' | 'mechanical';
 export type Theme = 'system' | 'light' | 'dark';
 

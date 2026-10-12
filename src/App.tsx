@@ -8,6 +8,7 @@ const CircuitPage = lazy(() => import('./pages/CircuitPage'));
 const CodePage = lazy(() => import('./pages/CodePage'));
 const YugasPage = lazy(() => import('./pages/YugasPage'));
 const BuildPage = lazy(() => import('./pages/BuildPage'));
+const MechanismsPage = lazy(() => import('./pages/MechanismsPage'));
 
 export const NAV: { id: Route; label: string }[] = [
   { id: 'explore', label: 'Explore' },
@@ -15,6 +16,7 @@ export const NAV: { id: Route; label: string }[] = [
   { id: 'circuit', label: 'Circuit' },
   { id: 'code', label: 'Code' },
   { id: 'yugas', label: 'The four yugas' },
+  { id: 'mechanisms', label: 'Mechanisms' },
   { id: 'build', label: 'Build guide' },
 ];
 
@@ -70,6 +72,7 @@ export function App() {
             {route === 'circuit' && <CircuitPage />}
             {route === 'code' && <CodePage />}
             {route === 'yugas' && <YugasPage />}
+            {route === 'mechanisms' && <MechanismsPage />}
             {route === 'build' && <BuildPage />}
           </Suspense>
         </main>
