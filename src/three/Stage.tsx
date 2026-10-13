@@ -9,7 +9,8 @@ import { Mechanism } from './Mechanism';
 import { Electronics } from './Electronics';
 import { applyDisplay } from './display';
 import { registry, tickExplode, explodeNow } from './Part';
-import { tickTweens, tweensActive } from './pose';
+import { tickTweens, tweensActive, setPose, clonePose, EXPLORE_POSE, LOCKED_POSE, setLeds, type Pose } from './pose';
+import { drawLcd } from './assets';
 import { useStore, reducedMotion } from '../store';
 import { FY, T, DRAWER_H } from './dims';
 import { PiggyBank } from './PiggyBank';
@@ -85,6 +86,37 @@ function panelOffset(dist: number, animate: boolean) {
   else cc.setFocalOffset(dist * Math.tan(vf) * cam.aspect * Math.min(0.45, 440 / window.innerWidth), 0, 0, animate);
 }
 
+/** Render mode (?render): lets scripts/render-stills.mjs set an exact pose, view and camera per shot. */
+interface ShotSpec {
+  base?: 'locked' | 'explore';
+  pose?: Partial<Pose>;
+  view?: { cutaway?: boolean; hideWalls?: boolean; wiringOnly?: boolean; explode?: number; mode?: 'electronic' | 'mechanical' };
+  cam: [[number, number, number], [number, number, number]];
+  fov?: number;
+  leds?: (string | null)[];
+  lcd?: [string, string];
+  /** spotlight: this part stays solid and outlined, the rest of the box fades */
+  select?: string;
+  /** parts lit in brass-orange alongside the spotlit part */
+  glow?: string[];
+}
+function installRenderApi() {
+  (window as unknown as { __yuga: unknown }).__yuga = {
+    shot(o: ShotSpec) {
+      setPose({ ...clonePose(o.base === 'locked' ? LOCKED_POSE : EXPLORE_POSE), ...(o.pose ?? {}) } as Pose);
+      useStore.setState({ selected: o.select ?? null, hovered: null, glow: o.glow ? { parts: o.glow, wires: [] } : null, drawer: false, cutaway: true, hideWalls: false, wiringOnly: false, explode: 0, mode: 'electronic', ...(o.view ?? {}) });
+      setLeds(o.leds ?? Array(8).fill(null));
+      drawLcd(...(o.lcd ?? ['Yuga Lotus Box', 'Code: ']));
+      if (!cc) return;
+      const cam = cc.camera as THREE.PerspectiveCamera;
+      cam.fov = o.fov ?? 34; cam.updateProjectionMatrix();
+      cc.setFocalOffset(0, 0, 0, false);
+      cc.setLookAt(...o.cam[0], ...o.cam[1], false);
+      touchShadows();
+    },
+  };
+}
+
 function CameraRig() {
   const ref = useRef<CameraControls>(null!);
   const { camera } = useThree();
@@ -94,6 +126,7 @@ function CameraRig() {
     cc.setLookAt(p.x, p.y, p.z, HOME.target.x, HOME.target.y, HOME.target.z, false);
     cc.smoothTime = reducedMotion() ? 0 : 0.45;
     cc.draggingSmoothTime = 0.12;
+    if (DBG.has('render')) installRenderApi();
     return () => { cc = null; };
   }, [camera]);
   return <CameraControls ref={ref} makeDefault minDistance={0.8} maxDistance={34} dollySpeed={0.6} />;

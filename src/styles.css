@@ -458,3 +458,8 @@ pre.code .ln { display: inline-block; width: 3.2em; padding-right: 1em; text-ali
 .m-sx.slow { animation-duration: 3.2s; }
 .m-push { animation: m-push 3.4s ease-in-out infinite; }
 .m-bob { animation: m-bob 3.4s ease-in-out infinite; }
+
+/* render mode (?render): clean frames for the video, no interface */
+html.render .topbar, html.render .drawer-btn, html.render .view-ctl, html.render .stage-hint, html.render .back-btn,
+html.render .hover-tag, html.render .drawer, html.render .detail { display: none !important; }
+html.render .stage-wrap { inset: 0; }

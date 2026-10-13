@@ -21,6 +21,8 @@ export function ExplorePage() {
       const p = PART_BY_ID[selected];
       if (!p) { useStore.getState().select(null); return; }
       if (!visibleInMode(p, mode)) { useStore.setState({ mode: p.version as 'electronic' | 'mechanical' }); return; }
+      // render mode places the camera itself
+      if (document.documentElement.classList.contains('render')) return;
       const t = setTimeout(() => camApi.flyTo(selected), 150);
       history.replaceState(null, '', `#/explore?part=${selected}`);
       prev.current = selected;

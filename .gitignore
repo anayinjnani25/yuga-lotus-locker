@@ -3,3 +3,5 @@ dist
 shots
 *.log
 yuga-locker-site/
+video/images/
+video/*.png
