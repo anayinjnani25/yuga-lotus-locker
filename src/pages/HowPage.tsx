@@ -7,6 +7,7 @@ import { PART_BY_ID } from '../data/parts';
 import { partHref } from '../App';
 
 const EXPLORE_LEDS = STEPS[5].endLeds;
+const LAST = STEPS.length - 1;
 
 export function HowPage() {
   const step = useStore((s) => s.step);
@@ -20,10 +21,10 @@ export function HowPage() {
   async function goTo(n: number, animate = true) {
     cancelTweens();
     const s = STEPS[n];
-    const before = STEPS[Math.max(0, n - 1)];
-    useStore.setState({ step: n, playing: animate && n > 0 });
+    const before = n === 0 ? s : STEPS[n - 1];
+    useStore.setState({ step: n, playing: animate });
     camApi.look(s.view[useStore.getState().mode].pos, s.view[useStore.getState().mode].target);
-    if (!animate || n === 0) {
+    if (!animate) {
       setPose(s.endPose); lcd(...s.endLcd); leds(s.endLeds);
       useStore.setState({ playing: false });
       return;
@@ -40,9 +41,9 @@ export function HowPage() {
   useEffect(() => {
     if (!ready) return;
     const q = new URLSearchParams(location.hash.split('?')[1] ?? '');
-    const n = Math.min(5, Math.max(0, Number(q.get('step') ?? 0) || 0));
+    const n = Math.min(LAST, Math.max(0, Number(q.get('step') ?? 0) || 0));
     useStore.setState({ selected: null, hovered: null, glow: null, drawer: false });
-    goTo(n, n > 0);
+    goTo(n, true);
     first.current = false;
     return () => {
       cancelTweens();
@@ -85,7 +86,7 @@ export function HowPage() {
       </div>
       <aside className="how-panel" aria-label="Play-through">
         <div className="how-top">
-          <div className="chips"><span className="chip">{step === 0 ? 'Start' : `Stage ${step} of 5`}</span><span className={`chip ver-${mode}`}>{mode === 'electronic' ? 'Electronic' : 'Mechanical'}</span></div>
+          <div className="chips"><span className="chip">{step === 0 ? 'Start' : step <= 5 ? `Stage ${step} of 5` : 'Bonus'}</span><span className={`chip ver-${mode}`}>{mode === 'electronic' ? 'Electronic' : 'Mechanical'}</span></div>
           <h2>{s.title}</h2>
         </div>
         <div className="how-body">
@@ -104,14 +105,14 @@ export function HowPage() {
               </li>
             ))}
           </ol>
-          {step === 5 && !playing && (
+          {step === LAST && !playing && (
             <p className="note small">Reset: press the petals closed until the catch clicks (or press * on the keypad), take the leaves out, mix up the bands and close the lid.</p>
           )}
         </div>
         <div className="how-nav">
           <button className="btn ghost" onClick={() => goTo(Math.max(0, step - 1), false)} disabled={step === 0}>← Previous</button>
-          <button className="btn ghost" onClick={() => goTo(step, true)} disabled={step === 0}>{playing ? 'Playing…' : '↻ Replay'}</button>
-          {step < 5
+          <button className="btn ghost" onClick={() => goTo(step, true)}>{playing ? 'Playing…' : '↻ Replay'}</button>
+          {step < LAST
             ? <button className="btn grow" onClick={() => goTo(step + 1, true)}>Next →</button>
             : <button className="btn grow" onClick={() => goTo(0, false)}>Restart</button>}
         </div>

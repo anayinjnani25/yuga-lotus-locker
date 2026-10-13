@@ -21,17 +21,21 @@ export interface Pose {
   ring: number;
   /** 0 = button out, 1 = pushed in */
   button: number;
-  /** 0 = lotus cocked/closed, 1 = fired/open */
+  /** 0 = lotus cocked/closed, 1 = fired/open (also lifts the drawer catch) */
   fire: number;
+  /** 0 = treasury drawer shut, 1 = pushed out */
+  drawer: number;
+  /** saved coin falling: 0 = at the slot (hidden), 1 = landed in the drawer (hidden) */
+  coin: number;
 }
 
 export const SCRAMBLE: [number, number, number] = [1.57, -3.14, 4.71];
 
 export const EXPLORE_POSE: Pose = {
-  wheels: 1, bolt: 1, lid: 1, lidServo: 1, walls: 0, bands: [0, 0, 0], leaves: [1, 1, 1, 1], ring: 1, button: 0, fire: 1,
+  wheels: 1, bolt: 1, lid: 1, lidServo: 1, walls: 0, bands: [0, 0, 0], leaves: [1, 1, 1, 1], ring: 1, button: 0, fire: 1, drawer: 0, coin: 0,
 };
 export const LOCKED_POSE: Pose = {
-  wheels: 0, bolt: 0, lid: 0, lidServo: 0, walls: 0, bands: [...SCRAMBLE], leaves: [0, 0, 0, 0], ring: 0, button: 0, fire: 0,
+  wheels: 0, bolt: 0, lid: 0, lidServo: 0, walls: 0, bands: [...SCRAMBLE], leaves: [0, 0, 0, 0], ring: 0, button: 0, fire: 0, drawer: 0, coin: 0,
 };
 
 export const pose: Pose = clonePose(EXPLORE_POSE);

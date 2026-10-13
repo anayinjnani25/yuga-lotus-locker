@@ -11,7 +11,8 @@ import { applyDisplay } from './display';
 import { registry, tickExplode, explodeNow } from './Part';
 import { tickTweens, tweensActive } from './pose';
 import { useStore, reducedMotion } from '../store';
-import { FY, T } from './dims';
+import { FY, T, DRAWER_H } from './dims';
+import { PiggyBank } from './PiggyBank';
 
 const DBG = new URLSearchParams(location.search);
 
@@ -142,8 +143,8 @@ function DisplayManager({ root }: { root: React.RefObject<THREE.Group> }) {
 function Floor({ a }: { a: Assets }) {
   return (
     <group>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, FY - T - 0.46, 0]} material={a.floorMat}><circleGeometry args={[9, 48]} /></mesh>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, FY - T - 0.45, 0]} receiveShadow><circleGeometry args={[7, 40]} /><shadowMaterial opacity={0.45} /></mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, FY - T - DRAWER_H - T - 0.46, 0]} material={a.floorMat}><circleGeometry args={[9, 48]} /></mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, FY - T - DRAWER_H - T - 0.45, 0]} receiveShadow><circleGeometry args={[7, 40]} /><shadowMaterial opacity={0.45} /></mesh>
     </group>
   );
 }
@@ -173,6 +174,7 @@ function Scene({ a }: { a: Assets }) {
           <BoxShell a={a} />
           <Mechanism a={a} />
           <Electronics a={a} />
+          <PiggyBank a={a} />
         </group>
       <Floor a={a} />
       <DisplayManager root={root} />
