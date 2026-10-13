@@ -41,11 +41,11 @@ export const STEPS: Step[] = [
   {
     n: 0, title: 'Locked', sub: 'The box as the child finds it',
     caption: {
-      electronic: 'The box is shut. The screen asks for a code, and every puzzle inside is scrambled. Coins can still be saved: one drops through the slot in the lid and down the clear chute into the locked treasury drawer.',
-      mechanical: 'The box is shut. The number wheels show a wrong code, and every puzzle inside is scrambled. Coins can still be saved: one drops through the slot in the lid and down the clear chute into the locked treasury drawer.',
+      electronic: 'The box is shut. The screen asks for a code, and every puzzle inside is scrambled. Money can still be saved: a note goes in through the slot in the front of the locked treasury drawer.',
+      mechanical: 'The box is shut. The number wheels show a wrong code, and every puzzle inside is scrambled. Money can still be saved: a note goes in through the slot in the front of the locked treasury drawer.',
     },
-    parts: { electronic: ['lid', 'keypad', 'lcd', 'coin-slot', 'coin-chute', 'treasury-drawer'], mechanical: ['lid', 'number-wheels', 'bolt', 'coin-slot', 'coin-chute', 'treasury-drawer'] },
-    view: both({ pos: [7.5, 6.5, -10.5] as V3, target: [1.2, 0.6, -1.2] as V3 }),
+    parts: { electronic: ['lid', 'keypad', 'lcd', 'coin-slot', 'treasury-drawer'], mechanical: ['lid', 'number-wheels', 'bolt', 'coin-slot', 'treasury-drawer'] },
+    view: both({ pos: [5.5, 3.0, 12.5] as V3, target: [0, -0.4, 1.2] as V3 }),
     endPose: p0, endLcd: ['Yuga Lotus Box', 'Code: '], endLeds: OFF,
     run: async () => { await wait(400); await animateTo({ coin: 1 }, 1500); pose.coin = 0; },
   },
@@ -161,10 +161,10 @@ export const STEPS: Step[] = [
   {
     n: 6, title: 'The piggy bank opens', sub: 'Bonus · savings unlocked by the lotus',
     caption: {
-      electronic: 'The lotus servo lifted the push rod, and the release string tied to its foot pulled the drawer catch up. A small spring behind the treasury drawer pushes it out, full of saved coins. The firmware does not need to change: the rod does the unlocking.',
-      mechanical: 'When the main spring shot the push rod up, the release string tied to its foot pulled the drawer catch up. A small spring behind the treasury drawer pushes it out, full of saved coins. Press the lotus closed again and the string goes slack, so the catch can lock the drawer.',
+      electronic: 'The lotus servo lifted the push rod, and the release string tied to its foot pulled the drawer catch up. A small spring behind the treasury drawer pushes it out, full of saved coins and notes. The firmware does not need to change: the rod does the unlocking.',
+      mechanical: 'When the main spring shot the push rod up, the release string tied to its foot pulled the drawer catch up. A small spring behind the treasury drawer pushes it out, full of saved coins and notes. Press the lotus closed again and the string goes slack, so the catch can lock the drawer.',
     },
-    parts: both(['release-string', 'drawer-catch', 'treasury-drawer', 'push-rod', 'coin-chute', 'coin-slot']),
+    parts: both(['release-string', 'drawer-catch', 'treasury-drawer', 'push-rod', 'coin-slot']),
     view: both({ pos: [7.5, 3.2, 12.5] as V3, target: [0.4, -1.4, 2.6] as V3 }),
     endPose: p6, endLcd: ['Collect coins!', '* to close'], endLeds: ALL,
     run: async () => { await wait(500); await animateTo({ drawer: 1 }, 1400); },

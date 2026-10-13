@@ -9,7 +9,6 @@ import { pose } from './pose';
 import { useStore } from '../store';
 import { rig } from './rig';
 import { S, T, HW, BH, P, FY, WZ, WYc, LID_OPEN, DRAWER_H } from './dims';
-import { CoinSlot } from './PiggyBank';
 
 const HALF = Math.PI / 2;
 const CODE = [1, 7, 0, 9], SCR = [4, 2, 8, 5];
@@ -116,7 +115,6 @@ export function BoxShell({ a }: { a: Assets }) {
                 <mesh position={[-0.6, -0.95, -0.56 - T / 2]} rotation={[0, HALF, 0]} material={a.springMat}><torusGeometry args={[0.08, 0.014, 8, 20]} /></mesh>
               </Part>
               <Part id="magnets"><Magnet p={[0.9, -0.02, -T / 2 - 0.05]} m={a.magnetMat} /></Part>
-              <CoinSlot a={a} />
             </Part>
           </group>
         </group>

@@ -12,6 +12,5 @@ export const RING_START = -1.35;         // ring angle at its stopper (about a q
 export const LIFT = 0.45;                // push-rod rise (2–3 cm at this scale)
 export const LID_OPEN = 1.9;             // lid prop angle in the cutaway
 export const BUTTON_Y = 0.42;
-/** Piggy-bank drawer layer under the bay, and the chute position (back-right corner). */
+/** Piggy-bank drawer layer under the electronics bay. */
 export const DRAWER_H = 0.55;
-export const CHUTE_X = 1.6, CHUTE_Z = -1.6;
