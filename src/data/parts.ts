@@ -3,7 +3,7 @@
 // Pin numbers must match firmware/yuga_lotus_locker_v2.ino. The pin table on the Circuit
 // page is generated from the `connections` below, so this file is the single source.
 
-export type GroupId = 'code' | 'puzzle' | 'leaves' | 'trigger' | 'lotus' | 'electronics' | 'box';
+export type GroupId = 'code' | 'puzzle' | 'leaves' | 'trigger' | 'lotus' | 'bank' | 'electronics' | 'box';
 export type Version = 'electronic' | 'mechanical' | 'both';
 export type AnimId =
   | 'reed' | 'catch' | 'servo' | 'keypad' | 'wheels' | 'umbrella' | 'i2c' | 'clothespin'
@@ -15,6 +15,7 @@ export const GROUPS: { id: GroupId; name: string }[] = [
   { id: 'leaves', name: 'Leaves' },
   { id: 'trigger', name: 'Lotus trigger' },
   { id: 'lotus', name: 'Lotus' },
+  { id: 'bank', name: 'Piggy bank' },
   { id: 'electronics', name: 'Electronics' },
   { id: 'box', name: 'Box' },
 ];
@@ -419,6 +420,64 @@ export const PARTS: Part[] = [
     related: ['petals', 'leaves'],
   },
 
+  // ───────────────────────── Piggy bank ─────────────────────────
+  {
+    id: 'coin-slot', name: 'Coin slot', qty: '1', group: 'bank', stages: [0], version: 'both',
+    what: 'A slot with a brass rim in the back-right corner of the lid.',
+    why: 'It turns the box into a real piggy bank: coins can be saved at any time, even while every puzzle is locked.',
+    how: 'A coin pushed through the slot drops into the clear chute directly below it and falls into the treasury drawer under the box.',
+    specs: [['Position', 'Back-right corner of the lid, over the chute'], ['Slot size', 'TBD (a little wider and longer than your biggest coin)']],
+    connections: [],
+    material: 'Brass-look rim cut into the teak lid',
+    buildTip: 'Cut the slot only after the chute is fixed, so you can mark exactly where the chute sits under the closed lid.',
+    related: ['coin-chute', 'treasury-drawer', 'lid'],
+  },
+  {
+    id: 'coin-chute', name: 'Clear coin chute', qty: '1', group: 'bank', stages: [0], version: 'both',
+    what: 'A clear tube standing in the back-right corner, from under the lid slot down through the floor and the electronics bay to the drawer.',
+    why: 'It carries coins past the puzzle and the electronics without touching them, and through the acrylic back you can watch every coin fall.',
+    how: 'It is fixed to the base, not to a wall, so it stays put when the walls fold open. A small funnel at the top catches coins from the slot.',
+    specs: [['Made from', 'Clear acrylic tube, or clear plastic sheet rolled into a tube'], ['Inside width', 'TBD (wider than your biggest coin)'], ['Position', 'Back-right corner, clear of the bands, ring and PCF8574']],
+    connections: [],
+    material: 'Clear acrylic or plastic',
+    buildTip: 'Keep the chute in the corner so it never rubs the picture bands, the leaf ring or the wiring. Smooth the inside so coins can’t catch.',
+    related: ['coin-slot', 'treasury-drawer', 'back-acrylic'],
+  },
+  {
+    id: 'treasury-drawer', name: 'Treasury drawer', qty: '1', group: 'bank', stages: [5], version: 'both',
+    what: 'A carved drawer in a new layer under the electronics bay, where the saved coins collect.',
+    why: 'It is the piggy bank’s safe: savings go in any time, but come out only after all five locks are solved.',
+    how: 'A catch holds the drawer shut. When the lotus opens, the rising push rod pulls the release string, the catch lifts, and a small spring behind the drawer pushes it out.',
+    specs: [['Opens', 'After stage 5, when the lotus petals open'], ['Push-out spring', 'Compression (pen) spring behind the drawer'], ['Size', 'TBD']],
+    connections: [],
+    material: 'Teak with a carved front and a brass knob',
+    buildTip: 'Make the drawer slide on two smooth runners and test that it pops out on its own before you fit the catch.',
+    related: ['drawer-catch', 'release-string', 'coin-chute', 'base'],
+  },
+  {
+    id: 'drawer-catch', name: 'Drawer catch', qty: '1', group: 'bank', stages: [5], version: 'both',
+    what: 'A small sprung lever (pawl) under the bay floor whose tooth drops into a notch on the drawer.',
+    why: 'It keeps the savings locked until the lotus opens.',
+    how: 'A light spring keeps the tooth in the drawer’s notch. The release string lifts the lever, the tooth comes out, and the drawer is free.',
+    anim: 'catch',
+    specs: [['Type', 'Spring catch (pawl)'], ['Spring', 'Pen spring or small rubber band'], ['Size', 'TBD']],
+    connections: [],
+    material: 'Ice-cream stick with a toothpick pivot',
+    buildTip: 'Use a light spring here: the push rod has to lift the catch easily, or the lotus may not open fully.',
+    related: ['release-string', 'treasury-drawer', 'catch-lever'],
+  },
+  {
+    id: 'release-string', name: 'Release string', qty: '1', group: 'bank', stages: [5], version: 'both',
+    what: 'A strong thread tied to the push rod’s foot, running down through the floor to the drawer catch.',
+    why: 'It links the lotus to the piggy bank: the same push that opens the petals unlocks the drawer, in both versions.',
+    how: 'When the rod rises 2–3 cm (main spring or lotus servo), the string pulls the catch up. When the lotus is pressed closed again, the string goes slack and the catch drops back.',
+    specs: [['Made from', 'Fishing line or strong thread'], ['Travel', '2–3 cm (the push rod stroke)']],
+    connections: [],
+    material: 'Fishing line',
+    buildTip: 'Leave a little slack when the lotus is closed, then tighten until the catch just lifts as the rod reaches the top.',
+    related: ['push-rod', 'drawer-catch', 'treasury-drawer'],
+  },
+
   // ───────────────────────── Electronics ─────────────────────────
   {
     id: 'arduino', name: 'Arduino Uno R3', qty: '1', group: 'electronics', stages: [1, 3, 4, 5], version: 'electronic',
@@ -685,7 +744,7 @@ export const PARTS: Part[] = [
   },
   {
     id: 'base', name: 'Base and electronics bay', qty: '1', group: 'box', stages: [0], version: 'both',
-    what: 'The hollow base under the box floor, with brass plinth, feet and corner straps. Its sides carry a jaali lattice.',
+    what: 'The hollow base under the box floor, with brass plinth, feet and corner straps. Its sides carry a jaali lattice. Below it is the treasury drawer layer.',
     why: 'It holds the core tube and, in the electronic box, all the electronics.',
     how: 'The bay has a removable bottom plate so you can reach the wiring. The keypad and screen sit in windows in its front.',
     specs: [['Size', 'About 20 × 20 cm, 6 cm deep'], ['Bottom', 'Removable plate'], ['Windows', 'Keypad and screen']],

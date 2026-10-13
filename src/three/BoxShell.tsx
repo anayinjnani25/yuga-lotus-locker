@@ -8,7 +8,8 @@ import { Bx, Rod, Spring, Reed, Magnet, Wire } from './bits';
 import { pose } from './pose';
 import { useStore } from '../store';
 import { rig } from './rig';
-import { S, T, HW, BH, P, FY, WZ, WYc, LID_OPEN } from './dims';
+import { S, T, HW, BH, P, FY, WZ, WYc, LID_OPEN, DRAWER_H } from './dims';
+import { CoinSlot } from './PiggyBank';
 
 const HALF = Math.PI / 2;
 const CODE = [1, 7, 0, 9], SCR = [4, 2, 8, 5];
@@ -115,6 +116,7 @@ export function BoxShell({ a }: { a: Assets }) {
                 <mesh position={[-0.6, -0.95, -0.56 - T / 2]} rotation={[0, HALF, 0]} material={a.springMat}><torusGeometry args={[0.08, 0.014, 8, 20]} /></mesh>
               </Part>
               <Part id="magnets"><Magnet p={[0.9, -0.02, -T / 2 - 0.05]} m={a.magnetMat} /></Part>
+              <CoinSlot a={a} />
             </Part>
           </group>
         </group>
@@ -139,15 +141,15 @@ export function BoxShell({ a }: { a: Assets }) {
         <Bx s={[S, BH, T]} p={[0, -T - BH / 2, P]} m={[a.teakEdge, a.teakEdge, a.teakEdge, a.teakEdge, mats.bayBand, a.teakIn]} />
         <mesh position={[0, -T - BH / 2, -P]} material={a.acrylic} renderOrder={10} userData={{ noShadow: true }}><boxGeometry args={[S, BH, 0.05]} /></mesh>
         <Bx s={[S + 2 * T, T, S + 2 * T]} p={[0, FY - T / 2, 0]} m={[a.teakEdge, a.teakEdge, a.blk, a.teakEdge, a.teakEdge, a.teakEdge]} />
-        <Bx s={[S + 0.7, 0.22, S + 0.7]} p={[0, FY - T - 0.11, 0]} m={a.brass} />
+        <Bx s={[S + 0.7, 0.22, S + 0.7]} p={[0, FY - T - DRAWER_H - T - 0.11, 0]} m={a.brass} />
         <instancedMesh args={[undefined, undefined, 4]} material={a.brass} ref={(m) => {
           if (!m) return; const o = new THREE.Object3D();
-          [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([x, z], i) => { o.position.set(x * (S / 2 + 0.1), FY - T - 0.3, z * (S / 2 + 0.1)); o.scale.set(1, 0.6, 1); o.updateMatrix(); m.setMatrixAt(i, o.matrix); });
+          [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([x, z], i) => { o.position.set(x * (S / 2 + 0.1), FY - T - DRAWER_H - T - 0.3, z * (S / 2 + 0.1)); o.scale.set(1, 0.6, 1); o.updateMatrix(); m.setMatrixAt(i, o.matrix); });
           m.instanceMatrix.needsUpdate = true; m.computeBoundingSphere();
         }}>
           <sphereGeometry args={[0.24, 20, 12]} />
         </instancedMesh>
-        {[[-1, -1], [1, -1], [-1, 1], [1, 1]].map(([x, z]) => <Bx key={`${x}${z}`} s={[0.2, BH + T, 0.2]} p={[x * (P + 0.02), -(BH + T) / 2, z * (P + 0.02)]} m={a.darkBrass} />)}
+        {[[-1, -1], [1, -1], [-1, 1], [1, 1]].map(([x, z]) => <Bx key={`${x}${z}`} s={[0.2, BH + 2 * T + DRAWER_H, 0.2]} p={[x * (P + 0.02), -(BH + 2 * T + DRAWER_H) / 2, z * (P + 0.02)]} m={a.darkBrass} />)}
       </Part>
 
       {/* keypad and screen in the front of the base */}
